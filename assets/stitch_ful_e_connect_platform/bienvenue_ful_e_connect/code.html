@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fulɓe Connect - Welcome</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration (Provided) -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#241a00",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#2e3132",
+                    "surface-tint": "#3f6653",
+                    "inverse-on-surface": "#f0f1f2",
+                    "outline": "#717973",
+                    "on-surface": "#191c1d",
+                    "outline-variant": "#c1c8c2",
+                    "tertiary-container": "#003f63",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary-container": "#fed65b",
+                    "on-tertiary-fixed": "#001d32",
+                    "on-tertiary-container": "#59adee",
+                    "background": "#f8f9fa",
+                    "primary": "#012d1d",
+                    "secondary-fixed": "#ffe088",
+                    "secondary-fixed-dim": "#e9c349",
+                    "surface": "#f8f9fa",
+                    "inverse-primary": "#a5d0b9",
+                    "on-primary-fixed": "#002114",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f8f9fa",
+                    "on-secondary-fixed-variant": "#574500",
+                    "on-error-container": "#93000a",
+                    "secondary": "#735c00",
+                    "surface-container-high": "#e7e8e9",
+                    "tertiary": "#002842",
+                    "tertiary-fixed-dim": "#93ccff",
+                    "on-secondary-container": "#745c00",
+                    "on-tertiary-fixed-variant": "#004b74",
+                    "on-primary": "#ffffff",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "on-error": "#ffffff",
+                    "surface-container": "#edeeef",
+                    "tertiary-fixed": "#cde5ff",
+                    "on-primary-container": "#86af99",
+                    "primary-fixed": "#c1ecd4",
+                    "primary-container": "#1b4332",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface-variant": "#414844",
+                    "error": "#ba1a1a",
+                    "on-background": "#191c1d",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-dim": "#d9dadb",
+                    "on-tertiary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-lg": "32px",
+                    "stack-md": "16px",
+                    "container-max-width": "1280px",
+                    "margin-desktop": "40px",
+                    "stack-sm": "8px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter", "sans-serif"],
+                    "body-md": ["Inter", "sans-serif"],
+                    "label-sm": ["Inter", "sans-serif"],
+                    "body-lg": ["Inter", "sans-serif"],
+                    "headline-lg-mobile": ["Inter", "sans-serif"],
+                    "display-lg": ["Inter", "sans-serif"],
+                    "headline-lg": ["Inter", "sans-serif"],
+                    "label-md": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased bg-primary selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- 
+        Shared Component Logic:
+        Navigation (TopAppBar, BottomNavBar, Drawer) and FAB are INTENTIONALLY SUPPRESSED.
+        Reason: This is a linear/transactional onboarding screen. The Canvas must take full priority.
+    -->
+<main class="relative min-h-[884px] w-full flex flex-col justify-between overflow-hidden">
+<!-- Background Layer with Image and Gradient Overlay -->
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=2000&amp;q=80')] bg-cover bg-center opacity-30 mix-blend-overlay" data-alt="A subtle, sophisticated background illustration depicting a minimalist world map interwoven with abstract, flowing lines representing global connection and community. The color palette is restricted to deep, rich greens with extremely faint, elegant gold line work. The mood is premium, stable, and culturally resonant. Lighting is soft and ambient, creating a high-trust, professional aesthetic without distracting from foreground elements.">
+</div>
+<!-- Deep green gradient to ensure text legibility -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/80 to-primary"></div>
+</div>
+<!-- Content Canvas -->
+<div class="relative z-10 flex flex-col h-full min-h-[884px] px-margin-mobile md:px-margin-desktop py-stack-lg max-w-container-max-width mx-auto w-full">
+<!-- Header: Language Selection -->
+<header class="flex justify-end items-center gap-stack-sm w-full pt-4">
+<nav aria-label="Language selection" class="flex space-x-2 bg-surface-container-highest/20 backdrop-blur-md rounded-full p-1 border border-primary-fixed-dim/20">
+<button aria-current="true" class="font-label-sm text-label-sm px-4 py-2 rounded-full bg-secondary-container text-on-secondary-container shadow-sm transition-colors">
+                        Français
+                    </button>
+<button class="font-label-sm text-label-sm px-4 py-2 rounded-full text-primary-fixed-dim hover:bg-surface-container-highest/30 transition-colors">
+                        Fulfulde
+                    </button>
+<button class="font-label-sm text-label-sm px-4 py-2 rounded-full text-primary-fixed-dim hover:bg-surface-container-highest/30 transition-colors">
+                        English
+                    </button>
+</nav>
+</header>
+<!-- Main Hero Content -->
+<div class="flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto gap-stack-lg w-full mt-12 md:mt-0">
+<!-- Brand Icon / Logo Placeholder -->
+<div class="w-24 h-24 md:w-32 md:h-32 rounded-full bg-secondary-container/10 border border-secondary-container/30 flex items-center justify-center mb-stack-md backdrop-blur-sm relative shadow-[0px_4px_40px_rgba(254,214,91,0.15)]">
+<span class="material-symbols-outlined text-secondary-container fill-icon" style="font-size: 48px;">
+                        public
+                    </span>
+<!-- Decorative rings -->
+<div class="absolute inset-0 rounded-full border border-secondary-container/20 scale-110"></div>
+<div class="absolute inset-0 rounded-full border border-secondary-container/10 scale-125"></div>
+</div>
+<!-- Messaging -->
+<div class="flex flex-col gap-stack-sm">
+<h1 class="font-display-lg text-display-lg text-on-primary md:hidden">
+                        Fulɓe<br/>Connect
+                    </h1>
+<h1 class="font-display-lg text-display-lg text-on-primary hidden md:block">
+                        Fulɓe Connect
+                    </h1>
+<p class="font-body-lg text-body-lg text-primary-fixed-dim max-w-md mx-auto mt-stack-sm font-light tracking-wide">
+                        Connecter les Peuls partout dans le monde.
+                    </p>
+</div>
+</div>
+<!-- Action Area (CTAs) -->
+<div class="w-full max-w-md mx-auto flex flex-col gap-stack-md mt-auto pb-stack-lg">
+<button class="w-full py-4 rounded-xl bg-secondary-container text-on-secondary-container font-label-md text-label-md shadow-[0px_4px_20px_rgba(254,214,91,0.2)] hover:shadow-[0px_8px_30px_rgba(254,214,91,0.3)] hover:-translate-y-0.5 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-secondary-container focus:ring-offset-2 focus:ring-offset-primary">
+                    Rejoindre la communauté
+                </button>
+<button class="w-full py-4 rounded-xl bg-transparent border-2 border-primary-fixed-dim/30 text-primary-fixed-dim font-label-md text-label-md hover:bg-primary-fixed-dim/10 hover:border-primary-fixed-dim/50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-fixed-dim focus:ring-offset-2 focus:ring-offset-primary">
+                    Se connecter
+                </button>
+</div>
+</div>
+</main>
+</body></html>

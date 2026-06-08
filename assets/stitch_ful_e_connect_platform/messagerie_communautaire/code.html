@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fulɓe Connect - Messages</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#3f6653",
+                      "on-surface-variant": "#414844",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "outline-variant": "#c1c8c2",
+                      "primary": "#012d1d",
+                      "on-primary": "#ffffff",
+                      "tertiary": "#002842",
+                      "on-tertiary-fixed": "#001d32",
+                      "surface-container-high": "#e7e8e9",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed": "#cde5ff",
+                      "secondary-fixed": "#ffe088",
+                      "inverse-surface": "#2e3132",
+                      "surface-bright": "#f8f9fa",
+                      "error-container": "#ffdad6",
+                      "secondary-container": "#fed65b",
+                      "on-secondary-fixed": "#241a00",
+                      "secondary": "#735c00",
+                      "on-secondary": "#ffffff",
+                      "primary-fixed": "#c1ecd4",
+                      "on-primary-fixed-variant": "#274e3d",
+                      "surface-variant": "#e1e3e4",
+                      "on-background": "#191c1d",
+                      "surface-container-highest": "#e1e3e4",
+                      "surface-dim": "#d9dadb",
+                      "inverse-on-surface": "#f0f1f2",
+                      "on-secondary-container": "#745c00",
+                      "outline": "#717973",
+                      "on-tertiary-container": "#59adee",
+                      "surface": "#f8f9fa",
+                      "inverse-primary": "#a5d0b9",
+                      "tertiary-fixed-dim": "#93ccff",
+                      "primary-fixed-dim": "#a5d0b9",
+                      "surface-container": "#edeeef",
+                      "on-secondary-fixed-variant": "#574500",
+                      "background": "#f8f9fa",
+                      "on-tertiary": "#ffffff",
+                      "secondary-fixed-dim": "#e9c349",
+                      "surface-container-low": "#f3f4f5",
+                      "on-surface": "#191c1d",
+                      "on-error": "#ffffff",
+                      "on-primary-container": "#86af99",
+                      "tertiary-container": "#003f63",
+                      "on-tertiary-fixed-variant": "#004b74",
+                      "on-primary-fixed": "#002114",
+                      "primary-container": "#1b4332"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-sm": "8px",
+                      "container-max-width": "1280px",
+                      "unit": "4px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "40px",
+                      "stack-md": "16px",
+                      "stack-lg": "32px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar (Web & Mobile) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max-width mx-auto">
+<!-- Leading: Avatar -->
+<button class="cursor-pointer active:scale-95 transition-transform w-10 h-10 rounded-full overflow-hidden border border-outline-variant hover:opacity-80">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional individual with a warm, welcoming expression, serving as a user profile photo. The lighting is soft and natural, emphasizing a high-trust, contemporary aesthetic. The background is slightly blurred to keep the focus on the face, fitting perfectly into a clean, modern UI design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTZ2yEIzoiFKxwmK18du2u_TcWpbNO0dQJ-mLSNA13wDOXSQ_HLXA8VSekVjtoN8KOooVOWcfAD5fxIuVDVvn2p-x8WRVC7jNaSqLzoYSS3fHxChZpuAsW6UAzT_70vSAu4g53RCFmGpHUfCGEPHZETAw7RYOZZdQpbgC-uTuviDWM8P9irB_xIjS793qcxjXYm7JvQdTcm0oRQjwQftfhmb2l3M0XnNd0csNKRBysFxVFaGLd_FZ7NbBkV4VSs6aapFUMAGBJsYJG"/>
+</button>
+<!-- Headline -->
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+                Fulɓe Connect
+            </h1>
+<!-- Trailing: Icon -->
+<button class="cursor-pointer active:scale-95 transition-transform w-10 h-10 flex items-center justify-center text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 mt-16 mb-20 md:mb-0 w-full max-w-container-max-width mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
+<!-- Page Header & Tabs -->
+<div class="mb-stack-lg flex flex-col gap-stack-md">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary">Messages</h2>
+<!-- Custom Tabs (Direct Messages / Community Groups) -->
+<div class="flex border-b border-surface-variant">
+<button class="flex-1 pb-stack-sm border-b-2 border-primary text-primary font-label-md text-label-md text-center transition-colors">
+                    Direct Messages
+                </button>
+<button class="flex-1 pb-stack-sm border-b-2 border-transparent text-on-surface-variant hover:text-primary font-label-md text-label-md text-center transition-colors">
+                    Community Groups
+                </button>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="mb-stack-lg relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-3 pl-12 pr-4 font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all" placeholder="Search messages..." type="text"/>
+</div>
+<!-- Message List (Bento-inspired List) -->
+<div class="flex flex-col gap-stack-sm">
+<!-- Conversation Card 1 (Unread) -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-md shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-transform cursor-pointer flex items-center gap-stack-md border border-transparent hover:border-surface-variant relative">
+<!-- Unread Indicator -->
+<div class="absolute top-1/2 -translate-y-1/2 left-2 w-2 h-2 rounded-full bg-secondary-container"></div>
+<div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 relative ml-4">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A portrait of a young professional man in a business casual setting, smiling confidently. Soft, diffused lighting highlights his features against a clean, minimal background. The overall tone is approachable and professional, suitable for a global networking platform avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-8z130KWrRBIlzdIFs4CF1XFr43-jVjaWmp_tKRxSLjMcMYdVTH-An9N4VR6caNN-qfTiOJGrYO38nZ-61m-TrXy1gj51GT7g46YPiZblzkFxlGtmRww4Kf6iHO10WF90aItyQH5u9JuKCHRPuiqtFGAHikFeMKRAg2Gm29ZrzDRo8-YI907RfmCJxNWJqb6_J4m4xZd6xbrpL8oiOF3rd_UVBbDmrumawrznG37dsJGEeM-paamgZFF3dJw3VnZrZJ2Yxu7Au0RW"/>
+<!-- Online Status Badge -->
+<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-primary-fixed border-2 border-surface-container-lowest rounded-full"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-label-md text-label-md text-primary truncate font-bold">Amadou Diallo</h3>
+<span class="font-label-sm text-label-sm text-primary font-bold">10:42 AM</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface truncate font-medium">Are we still on for the mentor call tomorrow?</p>
+</div>
+</div>
+<!-- Conversation Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-md shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-transform cursor-pointer flex items-center gap-stack-md border border-transparent hover:border-surface-variant pl-6">
+<div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of an experienced woman in a corporate environment. She exudes confidence and warmth. The lighting is crisp and modern, with a subtly blurred office background. The image aligns with a high-trust, premium networking aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlqrL9d2qxjQZ1kO1Ez5OSNNSyPG1xVhMc15SKKYtjrv4JCIFz3u_JqpbMdZk_-7VLenOysN1yZe5GVVZqBwMX9EGJuyaEsd6CrY7C-Q8VG1ZjLjFlkXXRItKTvgR6ZMXpRTpUFC53J7R9XIXKaKhyVI8BOaL-VRgraEfnzM4DWtgn0DqXRkHAf2YGs3mPDCwlTxCrXApHwasJDYXvx470NLOaflnCmySvj87u55O3h_xqeqk0oMj5Hpb0lzIif7GikkMMnO1-yAwP"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Fatoumata Barry</h3>
+<span class="font-label-sm text-label-sm text-outline">Yesterday</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">Thanks for sharing the cultural library link, it was very helpful.</p>
+</div>
+</div>
+<!-- Conversation Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-md shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-transform cursor-pointer flex items-center gap-stack-md border border-transparent hover:border-surface-variant pl-6">
+<div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A stylish portrait of a man outdoors with soft, natural sunlight illuminating his face. The background is a gently out-of-focus urban setting. His expression is thoughtful and engaging, fitting for a modern, culturally connected professional network." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhGlf7C8PM5LQ_Otc55-9o1MbcfxbQMLQ-3RMhuB5RIlD-B_5lgsPqgcXhs_fwT87vX7F2eQHKD1ITnaAbrEs_mmZT5p4BHCC_NheS5j_P0Qg-aBhUsafk5qMNH1EN-3X4LkDcJVPNad0KVrLhFPmiRKt2DM_b9VuhsZ7ORsb0bpJrqnP5cwiRJocWvE0TYVU5iO26dEuhw8L9KLwERpmOyX3Mh4yktlNLJz8nmCd5n50-Zwb2DkQqqZ3VhozD5ClcJjk8azk8oPzc"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Ousmane Sy</h3>
+<span class="font-label-sm text-label-sm text-outline">Mon</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]" data-icon="done_all">done_all</span>
+<p class="font-body-md text-body-md truncate">Sounds good, let's catch up next week.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (New Message) -->
+<button aria-label="New Message" class="fixed right-margin-mobile md:right-margin-desktop bottom-24 md:bottom-10 w-14 h-14 bg-primary-container text-on-primary-container rounded-2xl shadow-lg flex items-center justify-center hover:shadow-xl hover:-translate-y-1 transition-all z-40">
+<span class="material-symbols-outlined" data-icon="edit_square" data-weight="fill">edit_square</span>
+</button>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe bg-surface dark:bg-inverse-surface z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-label-sm text-label-sm mt-1">Map</span>
+</a>
+<!-- Assuming Directory is roughly analogous to general 'Directory' intent, but this is a specific messaging page, so it's technically a sub-view. However, if forced to highlight a shell tab, maybe none are perfectly active, or perhaps Directory if it's considered part of the directory flow. We will leave Directory active as a fallback if this is accessed via Directory. Let's not highlight any to follow strict contextual logic if it's a dedicated messaging center, but typically a messaging tab would exist. Since it doesn't in the JSON, we leave them all inactive as it's a specialized sub-view, OR we suppress the nav. Wait, the prompt says "Design a messaging inbox for community members." and "You are only permitted to render the BottomNavBar or SideNav if the current screen represents a top-level destination... Automatic Suppression: You MUST exclude the navigation shell if the page intent is: ... Task-Focused: Any sub-page featuring a 'Close' or 'Back' action". But an inbox could be a main destination. Since we included it, let's keep all inactive as it doesn't match perfectly, or suppress it entirely. The prompt says "If the page content does not logically sit under the categories defined in the JSON, suppress the navigation to prioritize the content canvas." Let's actually remove the bottom nav to follow the filter rule strictly, as Inbox is not in ["Home", "Map", "Directory", "Market", "Profile"]. -->
+</nav>
+<!-- Actually, let's completely remove the BottomNavBar HTML to strictly adhere to the Shell Visibility & Relevance Filter rule, as 'Messages' is not in the JSON labels. Wait, I already added the HTML above. Let's just comment it out or leave it suppressed. I will remove the BottomNavBar block to be safe and strictly follow the rule. -->
+<script>
+        // Removing BottomNav to comply with Shell Suppression rule for non-matching destinations
+        const nav = document.querySelector('nav');
+        if(nav) nav.remove();
+    </script>
+</body></html>

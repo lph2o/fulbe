@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fulɓe Connect - Marketplace</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Hide scrollbar for category chips but allow scrolling */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<!-- Tailwind CSS with custom config -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#241a00",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#2e3132",
+                    "surface-tint": "#3f6653",
+                    "inverse-on-surface": "#f0f1f2",
+                    "outline": "#717973",
+                    "on-surface": "#191c1d",
+                    "outline-variant": "#c1c8c2",
+                    "tertiary-container": "#003f63",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary-container": "#fed65b",
+                    "on-tertiary-fixed": "#001d32",
+                    "on-tertiary-container": "#59adee",
+                    "background": "#f8f9fa",
+                    "primary": "#012d1d",
+                    "secondary-fixed": "#ffe088",
+                    "secondary-fixed-dim": "#e9c349",
+                    "surface": "#f8f9fa",
+                    "inverse-primary": "#a5d0b9",
+                    "on-primary-fixed": "#002114",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f8f9fa",
+                    "on-secondary-fixed-variant": "#574500",
+                    "on-error-container": "#93000a",
+                    "secondary": "#735c00",
+                    "surface-container-high": "#e7e8e9",
+                    "tertiary": "#002842",
+                    "tertiary-fixed-dim": "#93ccff",
+                    "on-secondary-container": "#745c00",
+                    "on-tertiary-fixed-variant": "#004b74",
+                    "on-primary": "#ffffff",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "on-error": "#ffffff",
+                    "surface-container": "#edeeef",
+                    "tertiary-fixed": "#cde5ff",
+                    "on-primary-container": "#86af99",
+                    "primary-fixed": "#c1ecd4",
+                    "primary-container": "#1b4332",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface-variant": "#414844",
+                    "error": "#ba1a1a",
+                    "on-background": "#191c1d",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-dim": "#d9dadb",
+                    "on-tertiary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-lg": "32px",
+                    "stack-md": "16px",
+                    "container-max-width": "1280px",
+                    "margin-desktop": "40px",
+                    "stack-sm": "8px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter", "sans-serif"],
+                    "body-md": ["Inter", "sans-serif"],
+                    "label-sm": ["Inter", "sans-serif"],
+                    "body-lg": ["Inter", "sans-serif"],
+                    "headline-lg-mobile": ["Inter", "sans-serif"],
+                    "display-lg": ["Inter", "sans-serif"],
+                    "headline-lg": ["Inter", "sans-serif"],
+                    "label-md": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-md shadow-sm flex justify-between items-center px-margin-mobile h-16 max-w-container-max-width mx-auto left-0 right-0">
+<div class="flex items-center gap-stack-sm cursor-pointer hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden shadow-sm">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional individual with a warm, welcoming expression. The lighting is soft and natural, highlighting a modern, approachable aesthetic suitable for a high-trust digital platform profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYbjRyfIUvCxB3fXwTIDqBDNEK3A-dB6GFdf6T_UbeiH5SlN13_xDL5NZyQeo6TjtJ0n8L8hWjFPyWlCGKfgFLiflCWQ_1TZQTGSA9JQZOqhFcZM2jaleOsDm5Qjc9yVEMhHipM25ZvghWhzc4WF-TZH4TPsdlhZ6r7iQF45GZCw2u7UVljtxQNKBCdBR2ctxT-aXDhgt3Edp85sUnhVCMw858pTrZoEr3dncdGzfQnFkBu-eO8cRHzzanei-qBDtIFY4XLNO_NsQl"/>
+</div>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Fulɓe Connect</span>
+</div>
+<button aria-label="notifications" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="pt-24 px-margin-mobile max-w-container-max-width mx-auto">
+<!-- Header & Search -->
+<div class="mb-stack-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-stack-sm">Marketplace</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack-md">Trouvez des services et des opportunités commerciales au sein de la communauté.</p>
+<div class="flex gap-stack-sm">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-xl py-3 pl-10 pr-4 font-body-md focus:bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/70" placeholder="Rechercher un service..." type="text"/>
+</div>
+<button class="w-12 flex items-center justify-center bg-surface-container-low border border-outline-variant rounded-xl text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+</div>
+<!-- Categories -->
+<div class="mb-stack-lg">
+<div class="flex gap-stack-sm overflow-x-auto hide-scrollbar pb-2">
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-md text-label-md bg-secondary-container text-on-secondary-container shadow-sm border border-transparent transition-colors">Tous</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low transition-colors shadow-sm">Traduction</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low transition-colors shadow-sm">Développement Web</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low transition-colors shadow-sm">Transport</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low transition-colors shadow-sm">Immobilier</button>
+</div>
+</div>
+<!-- Listings Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
+<!-- Card 1: Traduction -->
+<article class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden border border-surface-variant flex flex-col hover:-translate-y-[2px] transition-transform duration-300">
+<div class="h-40 w-full relative overflow-hidden bg-surface-container">
+<img alt="Traduction services" class="w-full h-full object-cover" data-alt="A clean, minimalist workspace featuring a modern laptop alongside neatly arranged papers and a stylish pen. The scene is illuminated by bright, diffused daylight, conveying a sense of professional diligence and clear communication, perfectly suited for a translation service listing in a premium directory." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnEjRbhzH5_Wj80muI5x3tkVTQ_nYExToffhCqSpQiVoBOkWAoG7a83AcLedjxAsNDjZKClB5lVkEqLaIiOWs1BH3YAXlYeg66QG-oRMArE3BIGXEWOUanWcebmM-BOZ0o-m8636502jOh3vspbpnmaSeFK3gkiTUtY8KbajBc8MKw2N8o-PXlvdQoTVLa8r656VODLjD2-p8kQS7Yfp-Cc6cWEN2V5C4yKAfLAXTtCA-S6U9xzJ3OjwBiFVOezTof_h8086WH3LMn"/>
+<div class="absolute top-3 left-3 bg-secondary-container/90 backdrop-blur text-on-secondary-container font-label-sm text-label-sm px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined" style="font-size: 14px;">translate</span> Traduction
+                    </div>
+</div>
+<div class="p-stack-md flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface text-lg leading-tight">Traduction Pulaar - Français Professionnelle</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm line-clamp-2 mb-stack-md">Services de traduction certifiés pour documents administratifs, commerciaux et littéraires. Précision garantie.</p>
+<div class="mt-auto flex items-end justify-between mb-stack-sm">
+<div class="flex items-center gap-1 text-secondary-fixed-dim">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">4.9</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-xs">(124 avis)</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-on-surface-variant text-xs block">À partir de</span>
+<span class="font-headline-md text-headline-md text-primary text-xl">35k FCFA</span>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg hover:opacity-90 transition-opacity active:scale-95 flex justify-center items-center gap-2">
+                        Réserver service
+                        <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- Card 2: Développement Web -->
+<article class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden border border-surface-variant flex flex-col hover:-translate-y-[2px] transition-transform duration-300">
+<div class="h-40 w-full relative overflow-hidden bg-surface-container">
+<img alt="Développement Web" class="w-full h-full object-cover" data-alt="A close-up view of lines of code glowing subtly on a high-resolution dark monitor screen, positioned next to a sleek, modern mechanical keyboard. The environment has a cool, focused atmosphere with soft ambient lighting, representing advanced technical skill and premium web development services." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-7WQaCwb2-8cZrsEj1cOxhgORdolPchQMsIXOJYvWdLgyka0uSSDJXxLFJylRPKYR0F1d1SjgDODWQQ2j1UdCNsMLHq2i4uLgrB4YRk8HPDBEYjiqqmT5xvCKzn5V2Ua0Ts2T6A5qY3XM2U_dVvSY73YkTre9Due36b3-91wpcScbu25O8yx7Cbum0XqTnG053T4dgG3TOdCO8my6t4OV7KFzGwzx0cd9R0wj0FiCaEKUdNWxFiyM-B6LMp9jTfq5sqNk6qbSD6yz"/>
+<div class="absolute top-3 left-3 bg-secondary-container/90 backdrop-blur text-on-secondary-container font-label-sm text-label-sm px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined" style="font-size: 14px;">code</span> Dév Web
+                    </div>
+</div>
+<div class="p-stack-md flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface text-lg leading-tight">Création Site E-commerce Sur Mesure</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm line-clamp-2 mb-stack-md">Boutiques en ligne performantes, design responsif et intégration de paiements locaux (Mobile Money).</p>
+<div class="mt-auto flex items-end justify-between mb-stack-sm">
+<div class="flex items-center gap-1 text-secondary-fixed-dim">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">5.0</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-xs">(42 avis)</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-on-surface-variant text-xs block">Forfait</span>
+<span class="font-headline-md text-headline-md text-primary text-xl">250k FCFA</span>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg hover:opacity-90 transition-opacity active:scale-95 flex justify-center items-center gap-2">
+                        Réserver service
+                        <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- Card 3: Transport -->
+<article class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden border border-surface-variant flex flex-col hover:-translate-y-[2px] transition-transform duration-300">
+<div class="h-40 w-full relative overflow-hidden bg-surface-container">
+<img alt="Transport Logistique" class="w-full h-full object-cover" data-alt="A dynamic shot of a pristine, modern transport truck driving along a smooth, sunlit highway against a clear blue sky. The image conveys reliability, speed, and expansive reach, emphasizing high-quality logistics and transport services within a professional marketplace context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuEuwxftiQkfvU9BANAp0YGgCgjcrUE32fA1M2D1yUE0BztSqnMQi_lwepluEGGeM0Knr8rKTUFa82R67HTBOyjD6Gm8RPLLKtxkwb0YAYk-3gD1Ukyko-RrYmUa6e4lHMoBXSyiZUbIHeTh3hNotFhdm_NWCxtu6SLcOEHhPppE4n4Ysn09oSTowXDRSLbwIB7MstbL8v5pmsPLR6a4CrAfNNP8dek1JTPZ41g8kqGwN0-kk1v5LWjSOF3eLpqzF_jLc1B0cbWl97"/>
+<div class="absolute top-3 left-3 bg-secondary-container/90 backdrop-blur text-on-secondary-container font-label-sm text-label-sm px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined" style="font-size: 14px;">local_shipping</span> Transport
+                    </div>
+</div>
+<div class="p-stack-md flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface text-lg leading-tight">Logistique &amp; Transport Inter-urbain</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm line-clamp-2 mb-stack-md">Transport sécurisé de marchandises avec suivi GPS en temps réel. Flotte moderne et chauffeurs expérimentés.</p>
+<div class="mt-auto flex items-end justify-between mb-stack-sm">
+<div class="flex items-center gap-1 text-secondary-fixed-dim">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">4.7</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-xs">(89 avis)</span>
+</div>
+<div class="text-right">
+<span class="font-label-md text-label-md text-on-surface-variant text-xs block">Par trajet</span>
+<span class="font-headline-md text-headline-md text-primary text-xl">Sur devis</span>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-3 rounded-lg hover:opacity-90 transition-opacity active:scale-95 flex justify-center items-center gap-2">
+                        Demander devis
+                        <span class="material-symbols-outlined" style="font-size: 18px;">mail</span>
+</button>
+</div>
+</article>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 border-t border-surface-variant dark:border-outline-variant shadow-[0px_-4px_20px_rgba(0,0,0,0.04)] bg-surface dark:bg-inverse-surface flex justify-around items-center h-20 px-2 pb-safe md:hidden">
+<!-- Inactive: Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 gap-1 w-16" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<!-- Inactive: Map -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 gap-1 w-16" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-label-sm text-label-sm">Map</span>
+</a>
+<!-- Inactive: Directory -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 gap-1 w-16" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-sm text-label-sm">Directory</span>
+</a>
+<!-- Active: Market -->
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim font-bold bg-secondary-container/30 rounded-xl px-3 py-1 active:scale-90 transition-all duration-200 gap-1 min-w-16" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-label-sm text-label-sm">Market</span>
+</a>
+<!-- Inactive: Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 gap-1 w-16" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

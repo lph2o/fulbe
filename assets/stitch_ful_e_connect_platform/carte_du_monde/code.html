@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fulɓe Connect - Global Map</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#241a00",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#2e3132",
+                    "surface-tint": "#3f6653",
+                    "inverse-on-surface": "#f0f1f2",
+                    "outline": "#717973",
+                    "on-surface": "#191c1d",
+                    "outline-variant": "#c1c8c2",
+                    "tertiary-container": "#003f63",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary-container": "#fed65b",
+                    "on-tertiary-fixed": "#001d32",
+                    "on-tertiary-container": "#59adee",
+                    "background": "#f8f9fa",
+                    "primary": "#012d1d",
+                    "secondary-fixed": "#ffe088",
+                    "secondary-fixed-dim": "#e9c349",
+                    "surface": "#f8f9fa",
+                    "inverse-primary": "#a5d0b9",
+                    "on-primary-fixed": "#002114",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f8f9fa",
+                    "on-secondary-fixed-variant": "#574500",
+                    "on-error-container": "#93000a",
+                    "secondary": "#735c00",
+                    "surface-container-high": "#e7e8e9",
+                    "tertiary": "#002842",
+                    "tertiary-fixed-dim": "#93ccff",
+                    "on-secondary-container": "#745c00",
+                    "on-tertiary-fixed-variant": "#004b74",
+                    "on-primary": "#ffffff",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "on-error": "#ffffff",
+                    "surface-container": "#edeeef",
+                    "tertiary-fixed": "#cde5ff",
+                    "on-primary-container": "#86af99",
+                    "primary-fixed": "#c1ecd4",
+                    "primary-container": "#1b4332",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface-variant": "#414844",
+                    "error": "#ba1a1a",
+                    "on-background": "#191c1d",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-dim": "#d9dadb",
+                    "on-tertiary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-lg": "32px",
+                    "stack-md": "16px",
+                    "container-max-width": "1280px",
+                    "margin-desktop": "40px",
+                    "stack-sm": "8px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter", "sans-serif"],
+                    "body-md": ["Inter", "sans-serif"],
+                    "label-sm": ["Inter", "sans-serif"],
+                    "body-lg": ["Inter", "sans-serif"],
+                    "headline-lg-mobile": ["Inter", "sans-serif"],
+                    "display-lg": ["Inter", "sans-serif"],
+                    "headline-lg": ["Inter", "sans-serif"],
+                    "label-md": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md h-screen w-screen overflow-hidden flex flex-col antialiased">
+<!-- TopAppBar -->
+<header class="bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-md shadow-sm fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 max-w-container-max-width mx-auto">
+<div class="flex items-center gap-stack-sm cursor-pointer active:scale-95 transition-transform hover:opacity-80 transition-opacity">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close-up studio portrait of a young professional of African descent, warmly lit against a clean, minimalist light background. The subject exudes confidence and approachability, aligning perfectly with a premium, high-trust global networking platform. The photography style is modern, sharp, and uses soft, diffused key lighting to emphasize natural skin tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_jwdZXqxeFi9AznvigIOQQSaYXDlmk4qYIOgwS4AniC0OWeUki2Z-gP3GUwstJQoGZqPyYZ_ujYbHe5d5_ko6mIMxuTk0Ykgn7jTowukIQlpXVWxwhizsclecDTcfxWzEHKzv9n1pFLNveU4qfdicF-KErRMpJ7qPwToOIZKAj5hzixL-xTpLxgFHyoXNbwuvSNWkjLTQd2IdbGDFyIqvCplB676KGdbIEcLDE5nrnSNds-ZxEvtxfLJM1pzJ1605V79FSZhKuBxC"/>
+</div>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">
+            Fulɓe Connect
+        </h1>
+<button class="text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-transform hover:opacity-80 transition-opacity p-2 rounded-full hover:bg-surface-variant/50">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+</button>
+</header>
+<!-- Map Canvas Area -->
+<main class="flex-1 relative mt-16 md:mb-0 mb-20 w-full bg-surface-container-low overflow-hidden">
+<!-- Interactive Map Background -->
+<div class="absolute inset-0 w-full h-full">
+<img alt="World Map" class="w-full h-full object-cover opacity-80 mix-blend-luminosity grayscale-[30%] contrast-75" data-alt="A highly detailed, stylized cartographic map of the world displayed from a top-down perspective. The map uses a sophisticated, muted color palette of pale silver, off-white, and soft topographical shading to create a high-end, minimalist aesthetic. The lighting is even and flat, emphasizing the geography without distraction, serving perfectly as an interactive canvas for a premium professional networking interface." data-location="World Map" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDH1hsNp5oDBZtup9j1Kp-HkCKSYoKd782id3hnnhJBV0OP4qWcXF6hpom7epoiQKmpLZHxKXspkgVd659q1bpRRoVsr0c7KyaA--01zITuPcQ79koyNINr4uNFieppq6_zx6NMaYLKZGBKY44hbpyaUJcZIkslkV-MvfSpWYyMo_sZAJlmtPP5V6SnsZryxPWZaYfBAhvK_MURQ84tIO7-a31y8zh4jI5DPEr0H7ryhakStmoLEdGgze-kKI7QD1-ZRQvUfEd7_86I"/>
+<!-- Overlay to mute colors further and ensure pins pop -->
+<div class="absolute inset-0 bg-surface/40 mix-blend-overlay pointer-events-none"></div>
+</div>
+<!-- Floating UI: Search & Filters -->
+<div class="absolute top-margin-mobile left-0 w-full px-margin-mobile md:px-margin-desktop z-20 pointer-events-none flex flex-col gap-stack-md max-w-container-max-width mx-auto right-0">
+<!-- Search Bar (Glassmorphism) -->
+<div class="pointer-events-auto bg-surface/90 backdrop-blur-xl border border-outline-variant/50 shadow-[0px_8px_32px_rgba(0,0,0,0.08)] rounded-full px-4 py-3 flex items-center gap-3 w-full md:max-w-md mx-auto transition-all focus-within:shadow-[0px_8px_32px_rgba(0,0,0,0.12)] focus-within:border-primary-container">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="bg-transparent border-none outline-none flex-1 font-body-md text-body-md text-on-surface placeholder:text-outline focus:ring-0 p-0" placeholder="Search members by city..." type="text"/>
+<button class="bg-primary-container text-on-primary rounded-full w-8 h-8 flex items-center justify-center hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+<!-- Country Filters (Scrollable Row) -->
+<div class="pointer-events-auto flex items-center gap-stack-sm overflow-x-auto pb-2 scrollbar-hide -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0 md:justify-center">
+<button class="whitespace-nowrap font-label-md text-label-md bg-primary-container text-on-primary-container font-semibold rounded-full px-5 py-2 shadow-sm transition-all border border-transparent">
+                    All Regions
+                </button>
+<button class="whitespace-nowrap font-label-md text-label-md bg-surface/80 backdrop-blur-md text-on-surface-variant hover:text-primary hover:bg-surface-variant/80 border border-outline-variant rounded-full px-5 py-2 shadow-sm transition-all">
+                    Sénégal
+                </button>
+<button class="whitespace-nowrap font-label-md text-label-md bg-surface/80 backdrop-blur-md text-on-surface-variant hover:text-primary hover:bg-surface-variant/80 border border-outline-variant rounded-full px-5 py-2 shadow-sm transition-all">
+                    Guinée
+                </button>
+<button class="whitespace-nowrap font-label-md text-label-md bg-surface/80 backdrop-blur-md text-on-surface-variant hover:text-primary hover:bg-surface-variant/80 border border-outline-variant rounded-full px-5 py-2 shadow-sm transition-all">
+                    France
+                </button>
+<button class="whitespace-nowrap font-label-md text-label-md bg-surface/80 backdrop-blur-md text-on-surface-variant hover:text-primary hover:bg-surface-variant/80 border border-outline-variant rounded-full px-5 py-2 shadow-sm transition-all">
+                    Italie
+                </button>
+<button class="whitespace-nowrap font-label-md text-label-md bg-surface/80 backdrop-blur-md text-on-surface-variant hover:text-primary hover:bg-surface-variant/80 border border-outline-variant rounded-full px-5 py-2 shadow-sm transition-all">
+                    Mali
+                </button>
+</div>
+</div>
+<!-- Interactive Map Pins (Simulated) -->
+<!-- Pin: Dakar (Cluster) -->
+<button class="absolute top-[45%] left-[42%] group z-10 transform -translate-x-1/2 -translate-y-1/2 pin-trigger" data-count="142" data-name="Dakar Cluster">
+<div class="relative flex items-center justify-center">
+<div class="absolute w-12 h-12 bg-primary-container/20 rounded-full animate-ping opacity-75"></div>
+<div class="w-10 h-10 bg-primary-container text-on-primary shadow-lg border-2 border-surface rounded-full flex items-center justify-center font-label-sm text-label-sm font-bold z-10 group-hover:scale-110 transition-transform cursor-pointer">
+                    142
+                </div>
+</div>
+</button>
+<!-- Pin: Paris (Single User) -->
+<button class="absolute top-[30%] left-[48%] group z-10 transform -translate-x-1/2 -translate-y-1/2 pin-trigger" data-img="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=150&amp;h=150&amp;fit=crop&amp;q=80" data-location="Paris, France" data-name="Amadou Diallo" data-role="Tech Lead">
+<div class="relative flex items-center justify-center">
+<div class="w-8 h-8 bg-primary text-on-primary shadow-md border-2 border-surface rounded-full flex items-center justify-center z-10 group-hover:scale-110 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-[16px] icon-filled">person</span>
+</div>
+<!-- Tooltip -->
+<div class="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm px-3 py-1 rounded-md whitespace-nowrap pointer-events-none">
+                    Paris (1)
+                </div>
+</div>
+</button>
+<!-- Pin: Milan (Small Cluster) -->
+<button class="absolute top-[33%] left-[51%] group z-10 transform -translate-x-1/2 -translate-y-1/2 pin-trigger" data-count="12" data-name="Milan Network">
+<div class="relative flex items-center justify-center">
+<div class="w-9 h-9 bg-primary-container text-on-primary shadow-md border-2 border-surface rounded-full flex items-center justify-center font-label-sm text-label-sm font-bold z-10 group-hover:scale-110 transition-transform cursor-pointer">
+                    12
+                </div>
+</div>
+</button>
+<!-- Pin: Conakry (Cluster) -->
+<button class="absolute top-[48%] left-[43%] group z-10 transform -translate-x-1/2 -translate-y-1/2 pin-trigger" data-count="86" data-name="Conakry Cluster">
+<div class="relative flex items-center justify-center">
+<div class="w-10 h-10 bg-primary-container text-on-primary shadow-md border-2 border-surface rounded-full flex items-center justify-center font-label-sm text-label-sm font-bold z-10 group-hover:scale-110 transition-transform cursor-pointer">
+                    86
+                </div>
+</div>
+</button>
+<!-- Member/Cluster Preview Card (Hidden by default, slides up) -->
+<div class="absolute bottom-margin-mobile left-margin-mobile right-margin-mobile md:left-auto md:right-margin-desktop md:w-80 bg-surface rounded-xl shadow-[0px_12px_40px_rgba(0,0,0,0.12)] border border-outline-variant/30 overflow-hidden transform translate-y-[120%] opacity-0 transition-all duration-300 ease-in-out z-30" id="preview-card">
+<!-- Card Header -->
+<div class="p-stack-md flex justify-between items-start border-b border-surface-variant">
+<div class="flex gap-3 items-center">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-variant flex-shrink-0" id="preview-avatar-container">
+<img alt="Profile" class="w-full h-full object-cover hidden" id="preview-img" src=""/>
+<div class="w-full h-full flex items-center justify-center text-on-surface-variant hidden" id="preview-icon">
+<span class="material-symbols-outlined">groups</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold text-[18px] leading-tight" id="preview-title"></h3>
+<p class="font-body-md text-body-md text-on-surface-variant text-[14px] mt-0.5" id="preview-subtitle"></p>
+</div>
+</div>
+<button class="text-on-surface-variant hover:bg-surface-variant/50 p-1 rounded-full transition-colors" id="close-preview">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Card Body -->
+<div class="p-stack-md bg-surface-bright flex gap-3">
+<button class="flex-1 bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold py-2.5 rounded-lg hover:bg-primary hover:text-on-primary transition-colors text-center">
+                    View Profile
+                </button>
+<button class="bg-surface border border-outline text-on-surface font-label-md text-label-md py-2.5 px-4 rounded-lg hover:bg-surface-variant transition-colors flex justify-center items-center">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe bg-surface dark:bg-inverse-surface border-t border-surface-variant dark:border-outline-variant shadow-[0px_-4px_20px_rgba(0,0,0,0.04)] z-50 md:hidden">
+<!-- Home (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 w-16">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="font-label-sm text-[10px] mt-1">Home</span>
+</button>
+<!-- Map (Active) -->
+<button class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim font-bold bg-secondary-container/30 rounded-xl px-4 py-1.5 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined text-[24px] icon-filled">map</span>
+<span class="font-label-sm text-[10px] mt-0.5 text-primary">Map</span>
+</button>
+<!-- Directory (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 w-16">
+<span class="material-symbols-outlined text-[24px]">groups</span>
+<span class="font-label-sm text-[10px] mt-1">Directory</span>
+</button>
+<!-- Market (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 w-16">
+<span class="material-symbols-outlined text-[24px]">storefront</span>
+<span class="font-label-sm text-[10px] mt-1">Market</span>
+</button>
+<!-- Profile (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 w-16">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="font-label-sm text-[10px] mt-1">Profile</span>
+</button>
+</nav>
+<!-- Simple JS for Interactive Pins -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pins = document.querySelectorAll('.pin-trigger');
+            const previewCard = document.getElementById('preview-card');
+            const closeBtn = document.getElementById('close-preview');
+            
+            const titleEl = document.getElementById('preview-title');
+            const subtitleEl = document.getElementById('preview-subtitle');
+            const imgEl = document.getElementById('preview-img');
+            const iconEl = document.getElementById('preview-icon');
+
+            pins.forEach(pin => {
+                pin.addEventListener('click', (e) => {
+                    // Prevent map click from closing immediately
+                    e.stopPropagation();
+
+                    // Get data
+                    const name = pin.getAttribute('data-name');
+                    const count = pin.getAttribute('data-count');
+                    const role = pin.getAttribute('data-role');
+                    const location = pin.getAttribute('data-location');
+                    const imgUrl = pin.getAttribute('data-img');
+
+                    // Populate Card
+                    titleEl.textContent = name;
+                    
+                    if (count) {
+                        subtitleEl.textContent = `${count} Members in this area`;
+                        imgEl.classList.add('hidden');
+                        iconEl.classList.remove('hidden');
+                    } else {
+                        subtitleEl.textContent = `${role} • ${location}`;
+                        if (imgUrl) {
+                            imgEl.src = imgUrl;
+                            imgEl.setAttribute('data-alt', 'A portrait photo of the selected network member.');
+                            imgEl.classList.remove('hidden');
+                            iconEl.classList.add('hidden');
+                        }
+                    }
+
+                    // Show Card
+                    previewCard.classList.remove('translate-y-[120%]', 'opacity-0');
+                    previewCard.classList.add('translate-y-0', 'opacity-100');
+                });
+            });
+
+            // Close Card Logic
+            const closeCard = () => {
+                previewCard.classList.remove('translate-y-0', 'opacity-100');
+                previewCard.classList.add('translate-y-[120%]', 'opacity-0');
+            };
+
+            closeBtn.addEventListener('click', closeCard);
+            
+            // Click outside to close (on the map area)
+            document.querySelector('main').addEventListener('click', (e) => {
+                if(!previewCard.contains(e.target) && !e.target.closest('.pin-trigger')) {
+                    closeCard();
+                }
+            });
+        });
+    </script>
+</body></html>

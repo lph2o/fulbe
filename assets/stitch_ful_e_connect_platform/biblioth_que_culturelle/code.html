@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fulɓe Connect - Cultural Library</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#241a00",
+                        "on-primary-fixed-variant": "#274e3d",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "surface-tint": "#3f6653",
+                        "inverse-on-surface": "#f0f1f2",
+                        "outline": "#717973",
+                        "on-surface": "#191c1d",
+                        "outline-variant": "#c1c8c2",
+                        "tertiary-container": "#003f63",
+                        "surface-variant": "#e1e3e4",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-container": "#fed65b",
+                        "on-tertiary-fixed": "#001d32",
+                        "on-tertiary-container": "#59adee",
+                        "background": "#f8f9fa",
+                        "primary": "#012d1d",
+                        "secondary-fixed": "#ffe088",
+                        "secondary-fixed-dim": "#e9c349",
+                        "surface": "#f8f9fa",
+                        "inverse-primary": "#a5d0b9",
+                        "on-primary-fixed": "#002114",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f8f9fa",
+                        "on-secondary-fixed-variant": "#574500",
+                        "on-error-container": "#93000a",
+                        "secondary": "#735c00",
+                        "surface-container-high": "#e7e8e9",
+                        "tertiary": "#002842",
+                        "tertiary-fixed-dim": "#93ccff",
+                        "on-secondary-container": "#745c00",
+                        "on-tertiary-fixed-variant": "#004b74",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#a5d0b9",
+                        "on-error": "#ffffff",
+                        "surface-container": "#edeeef",
+                        "tertiary-fixed": "#cde5ff",
+                        "on-primary-container": "#86af99",
+                        "primary-fixed": "#c1ecd4",
+                        "primary-container": "#1b4332",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#414844",
+                        "error": "#ba1a1a",
+                        "on-background": "#191c1d",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-dim": "#d9dadb",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "container-max-width": "1280px",
+                        "margin-desktop": "40px",
+                        "stack-sm": "8px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-md antialiased pb-[100px] md:pb-0">
+<!-- TopAppBar Shared Component -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max-width mx-auto">
+<div class="flex items-center gap-3 cursor-pointer active:scale-95 transition-transform hover:opacity-80 transition-opacity">
+<!-- Avatar Leading -->
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest border border-surface-variant">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close up portrait of a young professional of African descent smiling warmly. The lighting is soft and natural, emphasizing approachability and trust within a high-end corporate or global community setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuK14AinzOTPWeusFTEPh5Af5O7KmBXlwJvpf_vO5NB9jwT-B26eS1fJhVPzm03XlCx24hpdyme8wtXCpcRG6BALyhFPneXw5xsOdp9oLm2tm6s1EFuzPj4-topN58yh8Wtizr_HUZoTs6-hMaj21WIo9_BzHnTYOqTCwhbXmyF5Cr5QmTquYy1-guJAwym691mMwri7K2S5nRQZffZdFU38sGRctQ2L84DfTWdVtFXI77_hL5tNI6x5S8oIPA6NdVvGOnMk2-kn1M"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Fulɓe Connect</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="pt-[80px] w-full max-w-container-max-width mx-auto px-margin-mobile md:px-margin-desktop">
+<!-- Search Section -->
+<div class="relative w-full max-w-2xl mx-auto mb-stack-lg">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</div>
+<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-colors font-body-md text-on-surface placeholder:text-on-surface-variant shadow-[0px_2px_8px_rgba(0,0,0,0.02)]" placeholder="Search library, authors, or audio..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-2 flex items-center">
+<button class="p-2 bg-surface-container rounded-lg text-primary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+</div>
+</div>
+<!-- Hero Featured Section (Notion/Netflix hybrid cover) -->
+<section class="mb-stack-lg rounded-2xl bg-primary-container relative overflow-hidden shadow-[0px_8px_24px_rgba(0,0,0,0.08)] group cursor-pointer">
+<!-- Background Texture/Gradient -->
+<div class="absolute inset-0 bg-gradient-to-r from-primary-container to-transparent z-10"></div>
+<img class="absolute inset-0 w-full h-full object-cover object-right opacity-60 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" data-alt="A collection of ancient, beautifully bound books stacked elegantly on a dark mahogany wooden desk. Warm, golden hour light streams across the textured leather covers, creating a rich, scholarly, and historically significant atmosphere. Deep green and gold tones dominate the scene." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh39ecLefMWrCuPvl899MUixVVmUcamNzDMwhv2vcMEuA-sbw2CZKXefFyUStxwPfIax1JjbK7N0ir4oYygccBHPkVjUQr3WXi7ihlbTb5HG83BcZYrqweswbuFiGbZnBiDiyMpMqgati2cI83TVUiqhmGJIz5QZUcYM5N4FPwrbUP76FCJgOFOiAMqn-DiCy8pdekXH52SWXKmuvQtpihNT0iWLR9ynZX9nZEeUjt5fUanBbVJW-9t4tMrRXOKPD69NjgaZrGQvuw"/>
+<div class="relative z-20 p-6 md:p-10 flex flex-col justify-end min-h-[280px] md:min-h-[360px] w-full md:w-2/3">
+<span class="inline-block px-3 py-1 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded-full mb-4 w-max shadow-sm tracking-wider uppercase">Livre du Mois</span>
+<h2 class="font-display-lg text-display-lg text-on-primary mb-2 leading-tight">L'Épopée Peule</h2>
+<p class="font-body-lg text-body-lg text-primary-fixed-dim mb-6 max-w-lg">Une exploration profonde des racines, des traditions et de l'héritage nomade à travers les siècles.</p>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 bg-secondary-container text-on-secondary-container px-6 py-3 rounded-lg font-label-md text-label-md hover:bg-secondary-fixed transition-colors shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+                        Lire maintenant
+                    </button>
+<button class="flex items-center gap-2 bg-surface/20 text-on-primary border border-surface/30 px-4 py-3 rounded-lg hover:bg-surface/30 transition-colors backdrop-blur-sm">
+<span class="material-symbols-outlined">bookmark_add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Horizontal Scrollable Categories -->
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 mb-stack-md -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0 scroll-smooth">
+<button class="whitespace-nowrap px-5 py-2.5 bg-primary text-on-primary font-label-md text-label-md rounded-full shadow-sm transition-colors border border-transparent">Tous</button>
+<button class="whitespace-nowrap px-5 py-2.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-full shadow-sm border border-surface-variant hover:bg-surface-container transition-colors">Livres (Pulaar)</button>
+<button class="whitespace-nowrap px-5 py-2.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-full shadow-sm border border-surface-variant hover:bg-surface-container transition-colors">Dictionnaires</button>
+<button class="whitespace-nowrap px-5 py-2.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-full shadow-sm border border-surface-variant hover:bg-surface-container transition-colors">Histoire</button>
+<button class="whitespace-nowrap px-5 py-2.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-full shadow-sm border border-surface-variant hover:bg-surface-container transition-colors">Contes</button>
+<button class="whitespace-nowrap px-5 py-2.5 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-full shadow-sm border border-surface-variant hover:bg-surface-container transition-colors">Audio/Poésie</button>
+</div>
+<!-- Section: Netflix Style Horizontal List -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-end mb-4">
+<h3 class="font-headline-md text-headline-md text-on-surface">Récemment Ajoutés</h3>
+<button class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">Voir tout <span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+</div>
+<div class="flex gap-stack-md overflow-x-auto no-scrollbar pb-stack-sm -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
+<!-- Book Card 1 -->
+<div class="min-w-[140px] w-[140px] md:min-w-[180px] md:w-[180px] flex-shrink-0 group cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.04)] mb-3 border border-surface-variant group-hover:-translate-y-1 transition-transform duration-300">
+<img class="w-full h-full object-cover" data-alt="A minimalist book cover design featuring an abstract geometric pattern in muted earth tones, suggesting traditional African weaving patterns. The lighting is flat and graphic, creating a modern literary aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDetwKhHiCL5OOBPLtXbmMTHvVZ5FiOIC5Ua1swH3iKJ5k_a6m1RjTxgYje9T0Z9cJEsrGTgHI8JYn3-m03bVRKJwFcFGNOq43TTiZ0RZGZusD-TihT3DTfshXg-IEmJdIW4MIihdaUCkxJqg3agTle2tGML-_LaA8lKuB5b0RmUgYwhsFly4ckXhPm_jCbkIEg5PINOIm6LWrqvKfyUcYwSnEwtqknShMBDLbDxFvcjUPmbVp5T4AjUZfxNCxeOCfS02PrYALM4_fy"/>
+<div class="absolute top-2 right-2 bg-surface/80 backdrop-blur-sm p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px] text-primary">play_circle</span>
+</div>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">Pulaar Dictionary</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant line-clamp-1 font-normal mt-0.5">Amadou Bâ</p>
+</div>
+<!-- Book Card 2 -->
+<div class="min-w-[140px] w-[140px] md:min-w-[180px] md:w-[180px] flex-shrink-0 group cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.04)] mb-3 border border-surface-variant group-hover:-translate-y-1 transition-transform duration-300">
+<img class="w-full h-full object-cover" data-alt="A clean, contemporary book cover showing a macro shot of a desert landscape with sweeping dunes in golden light. The style is highly sophisticated, evoking themes of journey, history, and arid geography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5JGl-WP6peQvHnDxkmfDpWrcN7dl1BS9WgkVqawjJsS7cc9lKKvwGPgbQH6nZD1iovNlDaqGNdqrBpMe_UzqVLWQAe_Pn2YGv9xxz_y7cgpN2UhgWa_jqEi787zoFa-8Pmn-fSyMslCiy3GgYegMDBcTCHeanI8kWsv5mU7DbP7UZ2bUzT6mCuKSN_YHOZ14h339CrWX-aGdIHxnSgxqCRmgnidEf4XMOc2AdGg4sXO9g8oIp_iDNB-mwjAo4p5DHOl4OP3GzdBVg"/>
+<div class="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors"></div>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">Histoire du Fouta</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant line-clamp-1 font-normal mt-0.5">Ousmane Kane</p>
+</div>
+<!-- Book Card 3 -->
+<div class="min-w-[140px] w-[140px] md:min-w-[180px] md:w-[180px] flex-shrink-0 group cursor-pointer">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.04)] mb-3 border border-surface-variant group-hover:-translate-y-1 transition-transform duration-300 bg-surface-container-low flex items-center justify-center">
+<span class="material-symbols-outlined text-[48px] text-surface-variant">menu_book</span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface line-clamp-1 group-hover:text-primary transition-colors">Contes Nomades</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant line-clamp-1 font-normal mt-0.5">Collectif</p>
+</div>
+</div>
+</section>
+<!-- PDF/Audio Preview Inline Player -->
+<section class="mt-stack-lg mb-stack-lg border border-surface-variant rounded-xl overflow-hidden bg-surface-container-lowest shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex flex-col md:flex-row">
+<!-- PDF Viewer Mock -->
+<div class="w-full md:w-2/3 bg-surface-container-low border-b md:border-b-0 md:border-r border-surface-variant p-4 flex flex-col h-[300px] md:h-[400px]">
+<div class="flex justify-between items-center mb-4 bg-surface rounded-lg p-2 shadow-sm">
+<div class="flex items-center gap-2">
+<button class="p-1 hover:bg-surface-variant rounded text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">zoom_out</span></button>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Page 12 / 340</span>
+<button class="p-1 hover:bg-surface-variant rounded text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">zoom_in</span></button>
+</div>
+<button class="p-1 hover:bg-surface-variant rounded text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">fullscreen</span></button>
+</div>
+<!-- Simulated PDF Content -->
+<div class="flex-1 bg-white rounded shadow-sm p-6 overflow-y-auto no-scrollbar border border-surface-variant text-center opacity-50 select-none flex flex-col items-center justify-center">
+<div class="w-3/4 h-4 bg-surface-container-high rounded mb-4"></div>
+<div class="w-full h-3 bg-surface-container rounded mb-2"></div>
+<div class="w-full h-3 bg-surface-container rounded mb-2"></div>
+<div class="w-5/6 h-3 bg-surface-container rounded mb-4"></div>
+<span class="font-label-sm text-label-sm text-outline">[Aperçu du Document]</span>
+</div>
+</div>
+<!-- Metadata & Audio Player Side -->
+<div class="w-full md:w-1/3 p-6 flex flex-col justify-between bg-surface-container-lowest">
+<div>
+<span class="inline-block px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded mb-3">Livre Numérique</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Poésie Pastorale</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mb-6 font-normal">Auteur Inconnu</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-4 mb-6">
+                        Une collection de poèmes récités lors des transhumances, capturant l'essence de la relation entre l'homme, le bétail et la nature.
+                    </p>
+</div>
+<!-- Audio Player Widget -->
+<div class="bg-surface p-4 rounded-xl border border-surface-variant">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">headphones</span> Version Audio Disponible
+                        </span>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary-container transition-colors shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<div class="flex-1 h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="w-1/3 h-full bg-primary"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal">14:20</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Shared Component -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe bg-surface dark:bg-inverse-surface border-t border-surface-variant dark:border-outline-variant shadow-[0px_-4px_20px_rgba(0,0,0,0.04)] z-50 md:hidden">
+<!-- Active Tab (Assuming Home/Main Dashboard is active context for library access as per closest match rule) -->
+<div class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim font-bold bg-secondary-container/30 rounded-xl px-3 py-1 cursor-pointer active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed cursor-pointer active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">map</span>
+<span class="font-label-sm text-label-sm mt-1">Map</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed cursor-pointer active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">groups</span>
+<span class="font-label-sm text-label-sm mt-1">Directory</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed cursor-pointer active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">storefront</span>
+<span class="font-label-sm text-label-sm mt-1">Market</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed cursor-pointer active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="font-label-sm text-label-sm mt-1">Profile</span>
+</div>
+</nav>
+</body></html>

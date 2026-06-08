@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Job Board - Fulɓe Connect</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined', sans-serif;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Hide scrollbar for clean horizontal scrolling */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#241a00",
+                        "on-primary-fixed-variant": "#274e3d",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "surface-tint": "#3f6653",
+                        "inverse-on-surface": "#f0f1f2",
+                        "outline": "#717973",
+                        "on-surface": "#191c1d",
+                        "outline-variant": "#c1c8c2",
+                        "tertiary-container": "#003f63",
+                        "surface-variant": "#e1e3e4",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-container": "#fed65b",
+                        "on-tertiary-fixed": "#001d32",
+                        "on-tertiary-container": "#59adee",
+                        "background": "#f8f9fa",
+                        "primary": "#012d1d",
+                        "secondary-fixed": "#ffe088",
+                        "secondary-fixed-dim": "#e9c349",
+                        "surface": "#f8f9fa",
+                        "inverse-primary": "#a5d0b9",
+                        "on-primary-fixed": "#002114",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f8f9fa",
+                        "on-secondary-fixed-variant": "#574500",
+                        "on-error-container": "#93000a",
+                        "secondary": "#735c00",
+                        "surface-container-high": "#e7e8e9",
+                        "tertiary": "#002842",
+                        "tertiary-fixed-dim": "#93ccff",
+                        "on-secondary-container": "#745c00",
+                        "on-tertiary-fixed-variant": "#004b74",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#a5d0b9",
+                        "on-error": "#ffffff",
+                        "surface-container": "#edeeef",
+                        "tertiary-fixed": "#cde5ff",
+                        "on-primary-container": "#86af99",
+                        "primary-fixed": "#c1ecd4",
+                        "primary-container": "#1b4332",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#414844",
+                        "error": "#ba1a1a",
+                        "on-background": "#191c1d",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-dim": "#d9dadb",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "container-max-width": "1280px",
+                        "margin-desktop": "40px",
+                        "stack-sm": "8px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar (Web) -->
+<header class="hidden md:flex bg-surface/80 dark:bg-surface-container-lowest/80 fixed top-0 w-full z-50 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max-width mx-auto">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional individual in a well-lit, contemporary setting. The lighting is soft and natural, creating a high-trust, welcoming mood. The background is slightly blurred but suggests a modern office environment, aligning with a premium global connectivity platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkHBOz198B8-0TvJ7sdcyl9diVW0iVwE9xRA_WZb4QhEaYkUh2_YlYY_tuC5xNOgd8r8metbgIcosMpBS1vlYtWDwd6hXeje40wRF2rUehpUovHU0VqkpIRE_SGMyYlNocuqrM6vKfGnYxi2fAV_Bs14RbXP1Jl856cUJy8gCD582TpT-sRs9HjZB1dIJrrlvUDVN1_n80t6trKO0L6JtegE1NhsJ_tcTzuSTaxIXcUjeFMtTrsUFNKgGaAw2Sb8sRzMKmWoFCeNBJ"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Fulɓe Connect</h1>
+</div>
+<nav class="flex gap-stack-lg">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity" href="#">Home</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity" href="#">Map</a>
+<a class="font-body-md text-body-md text-primary dark:text-primary-fixed hover:opacity-80 transition-opacity font-bold" href="#">Job Board</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity" href="#">Market</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity" href="#">Profile</a>
+</nav>
+<button aria-label="notifications" class="text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity cursor-pointer active:scale-95 transition-transform" data-icon="notifications">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- TopAppBar (Mobile) -->
+<header class="flex md:hidden bg-surface/80 dark:bg-surface-container-lowest/80 fixed top-0 w-full z-50 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max-width mx-auto">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional individual in a well-lit, contemporary setting. The lighting is soft and natural, creating a high-trust, welcoming mood. The background is slightly blurred but suggests a modern office environment, aligning with a premium global connectivity platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfYAbrlA7D9MH02ZH1bQH2Qs2Q8tPLQLQ4Dd524gA040_xdjysigs2qG2-uB6-iJf4eeHTlYJVhnXiu0hAruKX2TOJmMscfgFvLapMgQ8pwedjptVAhiSZg7gH0sIgjuF5LAguq8N5GlC90LyaAyAwJ-B8NWw7uy0R-Jaz-DbBHRRiu_bAUGjcr2T46sMvKhWHLoSzosQwIbIf0bACbim_GfcNv_OaDTt24XMqxxzFViUU_TPWdt_L2N2_eNovMMVXPPfAkd9BSH0z"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Fulɓe Connect</h1>
+<button aria-label="notifications" class="text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity cursor-pointer active:scale-95 transition-transform" data-icon="notifications">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-24 md:pt-32 px-margin-mobile md:px-margin-desktop max-w-container-max-width mx-auto">
+<!-- Page Header & Search/Filter Section -->
+<div class="mb-stack-lg">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-stack-sm">Job Board</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack-md">Discover top opportunities across global and local markets.</p>
+<div class="bg-surface-container-lowest p-stack-md rounded-xl border border-surface-variant shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col md:flex-row gap-stack-md">
+<div class="flex-1 relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-surface-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-colors" placeholder="Search job title, keyword, or company..." type="text"/>
+</div>
+<div class="flex gap-stack-md overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+<select class="bg-surface-container-low border border-surface-variant rounded-lg px-4 py-3 font-body-md text-body-md min-w-[140px] focus:outline-none focus:ring-2 focus:ring-primary">
+<option value="">All Countries</option>
+<option value="sn">Senegal</option>
+<option value="ml">Mali</option>
+<option value="gn">Guinea</option>
+<option value="fr">France</option>
+<option value="us">USA</option>
+</select>
+<select class="bg-surface-container-low border border-surface-variant rounded-lg px-4 py-3 font-body-md text-body-md min-w-[140px] focus:outline-none focus:ring-2 focus:ring-primary">
+<option value="">All Domains</option>
+<option value="tech">Technology</option>
+<option value="health">Healthcare</option>
+<option value="finance">Finance</option>
+<option value="agri">Agriculture</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-stack-sm overflow-x-auto hide-scrollbar mb-stack-lg">
+<button class="px-4 py-2 bg-primary-container text-on-primary-container font-label-md text-label-md rounded-full whitespace-nowrap">All Roles</button>
+<button class="px-4 py-2 bg-surface-container-low text-on-surface border border-surface-variant hover:bg-surface-container-high font-label-md text-label-md rounded-full whitespace-nowrap transition-colors">Full-time</button>
+<button class="px-4 py-2 bg-surface-container-low text-on-surface border border-surface-variant hover:bg-surface-container-high font-label-md text-label-md rounded-full whitespace-nowrap transition-colors">Internships</button>
+<button class="px-4 py-2 bg-surface-container-low text-on-surface border border-surface-variant hover:bg-surface-container-high font-label-md text-label-md rounded-full whitespace-nowrap transition-colors">Freelance</button>
+<button class="px-4 py-2 bg-surface-container-low text-on-surface border border-surface-variant hover:bg-surface-container-high font-label-md text-label-md rounded-full whitespace-nowrap transition-colors">Remote</button>
+</div>
+<!-- Job Listings -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
+<!-- Job Card 1 -->
+<article class="bg-surface-container-lowest p-stack-md rounded-xl border border-surface-variant shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0px_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-[2px] transition-all duration-300 flex flex-col group">
+<div class="flex gap-stack-md items-start mb-stack-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high overflow-hidden shrink-0">
+<img alt="Company Logo" class="w-full h-full object-cover" data-alt="A clean, minimalist logo mark featuring a modern abstract geometric shape in deep blue on a stark white background. The lighting is neutral and even, ensuring high contrast and a professional, corporate tech aesthetic. The overall mood is precise and established." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeWflzWLDwHan15QECzv3UpIrRC9_LcyYX7_AzCQrmPGI7uwSnle59rfdGpWCrZqrUR9d0Jdmb-pJykxMNP7YKwqfwe4reN4jdu0Mk2BwW2wqxAlseS1Z-D9lNKcS0-XcaELNsPDDQFJGxvXD8ImLLOARKoiNdyEGS0-m3Q1yYFeCMD1yK7TDH-ZEF3tRUKaiVyXuh3ottqCsI7BgxB_1txy6HwRNkt8O0FdXly8dDIekZpJdGgUX7BycOj65o8I6Gtr9J4snc9D4d"/>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md !text-[18px] !line-height-[24px] text-on-surface mb-unit">Senior Frontend Engineer</h3>
+<p class="font-body-md text-body-md text-primary font-medium">TechNova Solutions</p>
+</div>
+</div>
+<div class="flex flex-col gap-unit mb-stack-md font-body-md text-body-md text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Dakar, Senegal (Hybrid)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">work</span>
+<span>Full-time · Tech</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>Posted 2 days ago</span>
+</div>
+</div>
+<div class="mt-auto pt-stack-sm flex items-center justify-between">
+<div class="flex items-center gap-1 text-primary-container bg-primary-container/10 px-2 py-1 rounded font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Alumni Present</span>
+</div>
+<button class="bg-primary-container text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-primary transition-colors">Postuler</button>
+</div>
+</article>
+<!-- Job Card 2 -->
+<article class="bg-surface-container-lowest p-stack-md rounded-xl border border-surface-variant shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0px_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-[2px] transition-all duration-300 flex flex-col group">
+<div class="flex gap-stack-md items-start mb-stack-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high overflow-hidden shrink-0">
+<img alt="Company Logo" class="w-full h-full object-cover" data-alt="A sophisticated corporate logo composed of intersecting green and gold circles, set against a pristine white background. The image is brightly lit, emphasizing the premium quality of a global finance firm. The aesthetic is minimal, high-trust, and professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3jE1gvTmSpZdh0mJDk2bIf3I1diYNfVhUk6Tl-_UbTQTAJ72HIuzp5BHnn4SAk3YZsoJLxrceqDiiYfNXOSqQ2VQqzfYn2vgOq60Var17HHuzCh8g4UGK2Z16ov8eXYPueBKPPqHJJ8TQpZ-i-QHZueTa91aRpnz9TW1gESSZPqqmBFzmzJaWycHVyP4R9sF2xpBNByS9i6ZnxFirNNgoNNHpCj2E6V61who3w7GXxGNaXtkqqX2lmtX4LJlu5muMY-nbE-lLWZCb"/>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md !text-[18px] !line-height-[24px] text-on-surface mb-unit">Agricultural Data Analyst</h3>
+<p class="font-body-md text-body-md text-primary font-medium">Sahel Agri-Tech</p>
+</div>
+</div>
+<div class="flex flex-col gap-unit mb-stack-md font-body-md text-body-md text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Bamako, Mali (On-site)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">work</span>
+<span>Contract · Agriculture</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>Posted 5 days ago</span>
+</div>
+</div>
+<div class="mt-auto pt-stack-sm flex items-center justify-between">
+<div class="flex items-center gap-1 text-secondary bg-secondary-container/30 px-2 py-1 rounded font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">handshake</span>
+<span>Community Partner</span>
+</div>
+<button class="bg-primary-container text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-primary transition-colors">Postuler</button>
+</div>
+</article>
+<!-- Job Card 3 -->
+<article class="bg-surface-container-lowest p-stack-md rounded-xl border border-surface-variant shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0px_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-[2px] transition-all duration-300 flex flex-col group">
+<div class="flex gap-stack-md items-start mb-stack-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high overflow-hidden shrink-0">
+<img alt="Company Logo" class="w-full h-full object-cover" data-alt="A modern healthcare brand icon featuring a stylized cross motif in calm teal tones. The background is completely white, and the lighting is even and soft. The visual style communicates safety, care, and modern clinical efficiency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSJt-nWkRfif9VPCPqOaE12GVqcNvYWdYeVDVgmBZltiIUZOWudTI7MKiYz2DpJmVLmMV2k3rHcWrJ4VTJlEtQJxu31upliU9yfYpRXt-zA_ZEyc_V6xFNcgrUAUmb0XoyJvJflRUqxfjtlf7LFF355Nlnk9mCAZxDJ-D1D3akwSgreOxUYgBBwZjejTEhbaPWAqBtUyxoqUXPQz_jK8uPCPvOHy4WoRHAuwQtzKKzjcBwbgirgiA-uO_6ZnXGLghsswbl9VpSn6HY"/>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md !text-[18px] !line-height-[24px] text-on-surface mb-unit">Public Health Consultant</h3>
+<p class="font-body-md text-body-md text-primary font-medium">Global Health Initiative</p>
+</div>
+</div>
+<div class="flex flex-col gap-unit mb-stack-md font-body-md text-body-md text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Remote (Global)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">work</span>
+<span>Freelance Mission · Health</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>Posted 1 week ago</span>
+</div>
+</div>
+<div class="mt-auto pt-stack-sm flex items-center justify-between">
+<div></div> <!-- Spacer -->
+<button class="bg-primary-container text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-primary transition-colors">Postuler</button>
+</div>
+</article>
+<!-- Job Card 4 -->
+<article class="bg-surface-container-lowest p-stack-md rounded-xl border border-surface-variant shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0px_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-[2px] transition-all duration-300 flex flex-col group">
+<div class="flex gap-stack-md items-start mb-stack-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high overflow-hidden shrink-0 flex items-center justify-center font-headline-md text-headline-md text-primary font-bold bg-surface-variant">
+                        FN
+                    </div>
+<div>
+<h3 class="font-headline-md text-headline-md !text-[18px] !line-height-[24px] text-on-surface mb-unit">Financial Auditor Internship</h3>
+<p class="font-body-md text-body-md text-primary font-medium">Fulani Network Finance</p>
+</div>
+</div>
+<div class="flex flex-col gap-unit mb-stack-md font-body-md text-body-md text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span>Conakry, Guinea (Hybrid)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">work</span>
+<span>Internship · Finance</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>Posted today</span>
+</div>
+</div>
+<div class="mt-auto pt-stack-sm flex items-center justify-between">
+<div class="flex items-center gap-1 text-primary-container bg-primary-container/10 px-2 py-1 rounded font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>For Students</span>
+</div>
+<button class="bg-primary-container text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-primary transition-colors">Postuler</button>
+</div>
+</article>
+</div>
+<!-- Load More -->
+<div class="mt-stack-lg flex justify-center">
+<button class="bg-transparent text-primary-container border border-primary-container px-8 py-3 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors">Load More Opportunities</button>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden bg-surface-container-lowest dark:bg-inverse-surface border-t border-surface-variant dark:border-outline-variant shadow-[0px_-4px_20px_rgba(0,0,0,0.04)] fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="map">map</span>
+<span class="font-label-sm text-label-sm mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim font-bold bg-secondary-container/30 rounded-xl px-3 py-1 active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined fill text-[24px]" data-icon="work" data-weight="fill">work</span> <!-- Intentionally using 'work' icon to semantically map to Job Board since 'Directory'/'groups' was in original JSON but user requested Job Board -->
+<span class="font-label-sm text-label-sm mt-1">Jobs</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="storefront">storefront</span>
+<span class="font-label-sm text-label-sm mt-1">Market</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200 w-16" href="#">
+<span class="material-symbols-outlined text-[24px]" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

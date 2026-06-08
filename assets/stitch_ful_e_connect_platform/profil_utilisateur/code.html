@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile - Aaliyah Sow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#3f6653",
+                    "on-surface-variant": "#414844",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "outline-variant": "#c1c8c2",
+                    "primary": "#012d1d",
+                    "on-primary": "#ffffff",
+                    "tertiary": "#002842",
+                    "on-tertiary-fixed": "#001d32",
+                    "surface-container-high": "#e7e8e9",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#cde5ff",
+                    "secondary-fixed": "#ffe088",
+                    "inverse-surface": "#2e3132",
+                    "surface-bright": "#f8f9fa",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#fed65b",
+                    "on-secondary-fixed": "#241a00",
+                    "secondary": "#735c00",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed": "#c1ecd4",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "surface-variant": "#e1e3e4",
+                    "on-background": "#191c1d",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-dim": "#d9dadb",
+                    "inverse-on-surface": "#f0f1f2",
+                    "on-secondary-container": "#745c00",
+                    "outline": "#717973",
+                    "on-tertiary-container": "#59adee",
+                    "surface": "#f8f9fa",
+                    "inverse-primary": "#a5d0b9",
+                    "tertiary-fixed-dim": "#93ccff",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "surface-container": "#edeeef",
+                    "on-secondary-fixed-variant": "#574500",
+                    "background": "#f8f9fa",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed-dim": "#e9c349",
+                    "surface-container-low": "#f3f4f5",
+                    "on-surface": "#191c1d",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#86af99",
+                    "tertiary-container": "#003f63",
+                    "on-tertiary-fixed-variant": "#004b74",
+                    "on-primary-fixed": "#002114",
+                    "primary-container": "#1b4332"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "container-max-width": "1280px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "40px",
+                    "stack-md": "16px",
+                    "stack-lg": "32px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "display-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+          font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background antialiased pb-24 md:pb-0">
+<!-- TopAppBar (Web) / TopAppBar (Mobile) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center px-margin-mobile h-16 w-full max-w-container-max-width mx-auto">
+<div class="flex items-center gap-4">
+<img alt="User profile photo" class="w-8 h-8 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity" data-alt="A close up portrait photo of a professional woman with a warm smile, wearing a subtle business attire. Soft natural lighting highlights her features. The background is a clean, minimal white space consistent with a high-end corporate or fintech aesthetic. High resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEAmc3gnoRWuXbAP7-tvZcumsLOY0xm9UENSunvefeLOjMSVd6031VQltkhVjmPQt_jP6PSpP5IVef_cXH157PEl7OZGe1bwZDCIcA5uuIx2tte7JCJTll3oHV2nfmDPywuuoXKz1ELhnNqulTDS9j9C3r16BaDKZwD7BSsIhqfGVH2DVzCtiT1DZJCT46G4amXoZ0JWV8YCP426l_XEluPzobgpkH2Ux5K988zpa2OUAbOpjr0_Ez3pjiSZJZGiVtFlf_GxmgTxmr"/>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Fulɓe Connect</h1>
+</div>
+<!-- Desktop Nav -->
+<nav class="hidden md:flex gap-8 items-center">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined mb-1">map</span>
+<span class="font-label-sm text-label-sm">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined mb-1">groups</span>
+<span class="font-label-sm text-label-sm">Directory</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined mb-1">storefront</span>
+<span class="font-label-sm text-label-sm">Market</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold" href="#">
+<span class="material-symbols-outlined fill mb-1">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<button class="text-on-surface-variant dark:text-outline-variant cursor-pointer active:scale-95 transition-transform hover:opacity-80">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-16 max-w-container-max-width mx-auto md:px-margin-desktop md:flex md:gap-gutter">
+<!-- Left Sidebar (Desktop Navigation Drawer Replacement) -->
+<aside class="hidden md:flex flex-col w-[280px] h-[calc(100vh-64px)] sticky top-16 bg-surface dark:bg-surface-container-low py-stack-md gap-stack-sm rounded-r-xl shadow-lg shrink-0">
+<div class="px-4 mb-4">
+<h2 class="font-headline-md text-headline-md text-primary mb-2">Aaliyah Sow</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Global Member</p>
+<p class="font-label-sm text-label-sm text-outline flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-[14px]">location_on</span> Dakar, SN</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-highest transition-colors rounded-full mx-2 font-body-md text-body-md duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">library_books</span>
+                    Cultural Library
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-highest transition-colors rounded-full mx-2 font-body-md text-body-md duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">work</span>
+                    Job Board
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-highest transition-colors rounded-full mx-2 font-body-md text-body-md duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">payments</span>
+                    Finance
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-highest transition-colors rounded-full mx-2 font-body-md text-body-md duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">school</span>
+                    Education
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-highest transition-colors rounded-full mx-2 font-body-md text-body-md duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined">translate</span>
+                    Language Selection
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container font-semibold rounded-full mx-2 font-body-md text-body-md duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined fill">settings</span>
+                    Settings
+                </a>
+</nav>
+</aside>
+<!-- Profile Content -->
+<div class="flex-1 w-full flex flex-col gap-stack-lg pb-stack-lg md:pt-stack-md">
+<!-- Hero / Profile Header -->
+<section class="relative w-full bg-surface-container-lowest rounded-none md:rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden border border-surface-variant">
+<!-- Cover Image -->
+<div class="h-48 md:h-64 w-full bg-surface-variant relative">
+<img alt="Cover Image" class="w-full h-full object-cover" data-alt="A highly detailed, wide architectural or abstract banner image featuring modern geometric patterns inspired by Fulani cultural motifs. The color palette is minimal, utilizing subtle off-whites, light greys, and faint earthy tones to create a premium, high-trust contemporary design background. Soft ambient lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcRNguCNmHXNJdXeA2FDTAjAWyfa-Rv5Abqfi8yOFWq9jM2AHtw6E0z_VxSgEk5D_1TGtfuf7sHlAoaeqpm7YCs-pPK2F1FUfNAp3466HXm4pKRGOmsieknourCj3z2IxH-W6PMtNflGN4YHOb1Zkr9cnZ8N_NJU2AYsl_aZffL46NuKOTWSaxhHLGkUZdoFrZS_GJX-QPsa6k6RcvPoX8yObXDAFNu4gR3CnhTGBXoIigw1u1yVk1XgEDlxptvMPCIws0Mewrz6Sl"/>
+</div>
+<!-- Profile Info Area -->
+<div class="px-margin-mobile md:px-stack-lg pb-stack-md relative">
+<!-- Avatar -->
+<div class="absolute -top-16 md:-top-20 border-4 border-surface-container-lowest rounded-full overflow-hidden shadow-sm">
+<img alt="Aaliyah Sow" class="w-32 h-32 md:w-40 md:h-40 object-cover bg-surface" data-alt="A close up portrait photo of a professional woman with a warm smile, wearing a subtle business attire. Soft natural lighting highlights her features. The background is a clean, minimal white space consistent with a high-end corporate or fintech aesthetic. High resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBANXrOkRaHkCSI63xqA1LxPGSwbxjFFfs0P_UCCHHdAHRAyPMt57Jl38--S-m7_IJ9S3WPVxFPVVWWVTV027u13hsditWaXALku9h3-Xl5BnWRHPJhGmuT8OkWuprQj5WpMKrGm-VF1y6tPOzd77EFfY1XB54EpRtB4ZfFmDOv2kgf4bRpoBFfoBgmaxSB13TmS7od2WuX8gXn5NEyVIW-wGkyOTUNuavttQndYDNXkJ-fi0qEduiU1JRTy3JEB4OSEypKxDC4HGp"/>
+</div>
+<!-- Actions -->
+<div class="flex justify-end pt-4 gap-2">
+<button class="h-10 px-4 rounded-lg border border-primary text-primary font-label-md hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">message</span> Message
+                        </button>
+<button class="h-10 px-6 rounded-lg bg-primary-container text-on-primary font-label-md hover:opacity-90 transition-opacity shadow-sm">
+                            Connect
+                        </button>
+</div>
+<!-- Details -->
+<div class="mt-4 md:mt-2">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-on-background flex items-center gap-2">Aaliyah Sow <span class="material-symbols-outlined text-tertiary-container fill text-[24px]">verified</span></h2>
+<p class="font-body-lg text-on-surface-variant mt-1">UX Designer &amp; Cultural Liaison</p>
+<div class="flex flex-wrap items-center gap-4 mt-3 font-label-md text-outline">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">location_on</span> Dakar, SN</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">link</span> <a class="text-tertiary-container hover:underline" href="#">aaliyah.design</a></span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">calendar_today</span> Joined 2021</span>
+</div>
+</div>
+<!-- Bio -->
+<p class="font-body-md text-on-background mt-6 max-w-3xl">
+                        Bridging digital experiences with cultural heritage. Specializing in inclusive UX design for global fintech platforms and providing professional Pulaar translation services to empower local communities.
+                    </p>
+</div>
+</section>
+<div class="flex flex-col lg:flex-row gap-stack-lg px-margin-mobile md:px-0">
+<!-- Left Column: Skills & Services -->
+<div class="w-full lg:w-1/3 flex flex-col gap-stack-lg">
+<!-- Skills -->
+<div class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant hover:-translate-y-[2px] hover:shadow-md transition-all duration-300">
+<h3 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">bolt</span> Professional Skills
+                        </h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container rounded-full font-label-md text-on-surface-variant border border-surface-dim">UX Design</span>
+<span class="px-3 py-1 bg-secondary-fixed/20 rounded-full font-label-md text-on-secondary-container border border-secondary-fixed-dim">Pulaar Translation</span>
+<span class="px-3 py-1 bg-surface-container rounded-full font-label-md text-on-surface-variant border border-surface-dim">Figma</span>
+<span class="px-3 py-1 bg-surface-container rounded-full font-label-md text-on-surface-variant border border-surface-dim">Cultural Research</span>
+<span class="px-3 py-1 bg-surface-container rounded-full font-label-md text-on-surface-variant border border-surface-dim">Accessibility</span>
+</div>
+</div>
+<!-- Services -->
+<div class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant hover:-translate-y-[2px] hover:shadow-md transition-all duration-300">
+<h3 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">storefront</span> Market Services
+                        </h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-start gap-3 p-3 rounded-lg border border-surface-variant hover:bg-surface-bright transition-colors cursor-pointer">
+<div class="w-12 h-12 rounded bg-tertiary-container flex items-center justify-center text-on-tertiary shrink-0">
+<span class="material-symbols-outlined">design_services</span>
+</div>
+<div>
+<h4 class="font-label-md text-on-background font-bold">UX Consultation</h4>
+<p class="font-label-sm text-on-surface-variant mt-1">1hr strategy session for inclusive product design.</p>
+<p class="font-label-md text-primary mt-2 font-bold">$150 / hr</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg border border-surface-variant hover:bg-surface-bright transition-colors cursor-pointer">
+<div class="w-12 h-12 rounded bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined">translate</span>
+</div>
+<div>
+<h4 class="font-label-md text-on-background font-bold">Pulaar Localization</h4>
+<p class="font-label-sm text-on-surface-variant mt-1">Professional translation for apps and documents.</p>
+<p class="font-label-md text-primary mt-2 font-bold">From $50</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Recent Activity / Posts Grid -->
+<div class="w-full lg:w-2/3 flex flex-col gap-stack-lg">
+<h3 class="font-headline-md text-headline-md text-primary flex items-center gap-2 px-1">
+<span class="material-symbols-outlined">grid_view</span> Recent Activity
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Post 1 -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant hover:-translate-y-[2px] hover:shadow-md transition-all duration-300 flex flex-col h-full">
+<div class="h-40 w-full bg-surface-variant">
+<img alt="Design Workshop" class="w-full h-full object-cover" data-alt="A clean, bright photograph showing a modern design workshop setting. Sketches and wireframes are laid out neatly on a white table. The lighting is natural and bright, emphasizing a professional, collaborative tech environment consistent with modern fintech aesthetics." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQSdW-pUUn-G_0qcPoqRrsb8Yx7S_hs7G1HW3tsheWQpzGlwz-iVYSqdFI6u4Lps_JIUOISVEp43YFPmBJZHcQMjCPTwVEOsbmbD5JKzEVilEgeNKF9OVv5x9m3PvFW8keu1Napc3iN6rPJvfKDFV7L2ktDORwF9HKbvRxeB4b66p4mJmJxyUmVmbrT43rvkvb-T7fwGImAvBPFNIyiRTUo6R3n8rFvFvbw0LR0QBnmwCYO2P0fr2Sue3hLWlz9KuBKtPw1UragF9L"/>
+</div>
+<div class="p-4 flex-1 flex flex-col">
+<span class="font-label-sm text-tertiary-container mb-2">UX Design</span>
+<p class="font-body-md text-on-background flex-1 line-clamp-3">Excited to share insights from our latest design sprint in Dakar. We focused on building more inclusive digital payment flows for rural communities. #DesignForGood</p>
+<div class="mt-4 flex items-center justify-between text-outline font-label-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">thumb_up</span> 124</span>
+<span>2 days ago</span>
+</div>
+</div>
+</article>
+<!-- Post 2 -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant hover:-translate-y-[2px] hover:shadow-md transition-all duration-300 flex flex-col h-full">
+<div class="p-4 flex-1 flex flex-col justify-center bg-surface-bright">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<div>
+<h4 class="font-label-md text-on-background font-bold">Community Discussion</h4>
+</div>
+</div>
+<p class="font-headline-md text-on-background text-lg leading-tight mb-4">"Language is the ultimate interface. How are we ensuring our tools speak to the people who need them most?"</p>
+<div class="mt-auto flex items-center justify-between text-outline font-label-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">comment</span> 42 Comments</span>
+<span>1 week ago</span>
+</div>
+</div>
+</article>
+<!-- Post 3 -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border border-surface-variant hover:-translate-y-[2px] hover:shadow-md transition-all duration-300 flex flex-col h-full md:col-span-2 md:flex-row">
+<div class="h-48 md:h-auto md:w-1/3 bg-surface-variant shrink-0">
+<img alt="Team Meeting" class="w-full h-full object-cover" data-alt="A professional business meeting scene in a brightly lit modern office. A group of diverse professionals are discussing around a sleek table with laptops. The aesthetic is high-trust, premium corporate style with a clean white and soft grey color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnqx7Ce001RdsI5_0FWr80HQxzkL_uPMB7YY4DeZjMitKFc5GdB8W4ysK96iSc-wy8VaXzHlz1kq4XJldUaVe9a6piLqHfag_WCd9YFB-OTXf912-itR-R9TKaG_VlfBXQfhbjlWxAsq2SUv0UIzOnztogKov2i0hrBCkMUwH2emMvyd7Qn5HvGmleWU8PVbw0T3ZFfaebs7sHNqcXITupN3FkvBTZOXybq261hqlH9XH-Nh_eFOQTCSUxx9dIatk-sTdEjK4fKlJs"/>
+</div>
+<div class="p-4 md:p-6 flex-1 flex flex-col justify-center">
+<span class="font-label-sm text-secondary-container bg-secondary-fixed/20 px-2 py-1 rounded w-fit mb-3">Event</span>
+<h4 class="font-headline-md text-on-background mb-2">Joining the Pan-African Tech Panel</h4>
+<p class="font-body-md text-on-surface-variant mb-4">I'll be speaking next month about the intersection of cultural heritage and modern fintech UI. Looking forward to connecting with fellow designers!</p>
+<button class="font-label-md text-primary font-bold hover:underline self-start mt-auto">Read More →</button>
+</div>
+</article>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe bg-surface-container-lowest dark:bg-inverse-surface border-t border-surface-variant dark:border-outline-variant shadow-[0px_-4px_20px_rgba(0,0,0,0.04)] z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">map</span>
+<span class="font-label-sm text-label-sm">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">groups</span>
+<span class="font-label-sm text-label-sm">Directory</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">storefront</span>
+<span class="font-label-sm text-label-sm">Market</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim font-bold bg-secondary-container/30 rounded-xl px-3 py-1 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined fill mb-1">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>
