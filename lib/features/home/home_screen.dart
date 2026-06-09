@@ -170,6 +170,8 @@ class _ModuleQuickRow extends StatelessWidget {
   const _ModuleQuickRow({required this.context});
 
   static const _modules = [
+    _Module(icon: Icons.calendar_month_outlined, label: 'Événements',
+        route: AppRoutes.events),
     _Module(icon: Icons.local_library_outlined, label: 'Bibliothèque',
         route: AppRoutes.library),
     _Module(icon: Icons.work_outline, label: 'Emplois',

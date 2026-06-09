@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../features/onboarding/welcome_screen.dart';
+import '../../features/onboarding/auth_gate.dart';
+import '../../features/auth/auth_screen.dart';
 import '../../features/library/library_screen.dart';
 import '../../features/jobs/jobs_screen.dart';
 import '../../features/finances/finances_screen.dart';
 import '../../features/learning/learning_screen.dart';
 import '../../features/messages/messages_screen.dart';
+import '../../features/events/events_screen.dart';
 import '../navigation/main_shell.dart';
 
 abstract class AppRoutes {
-  static const welcome = '/';
+  static const authGate = '/';
+  static const welcome = '/welcome';
+  static const auth = '/auth';
   static const home = '/home';
   static const map = '/map';
   static const directory = '/directory';
@@ -19,12 +24,17 @@ abstract class AppRoutes {
   static const finances = '/finances';
   static const learn = '/learn';
   static const messages = '/messages';
+  static const events = '/events';
 }
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
+    case AppRoutes.authGate:
+      return _fadeRoute(const AuthGate());
     case AppRoutes.welcome:
       return _fadeRoute(const WelcomeScreen());
+    case AppRoutes.auth:
+      return _fadeRoute(const AuthScreen());
     case AppRoutes.home:
       return _fadeRoute(const MainShell(initialIndex: 0));
     case AppRoutes.map:
@@ -45,8 +55,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (_) => const LearningScreen());
     case AppRoutes.messages:
       return MaterialPageRoute(builder: (_) => const MessagesScreen());
+    case AppRoutes.events:
+      return MaterialPageRoute(builder: (_) => const EventsScreen());
     default:
-      return _fadeRoute(const WelcomeScreen());
+      return _fadeRoute(const AuthGate());
   }
 }
 
