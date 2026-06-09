@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
@@ -9,10 +10,24 @@ import '../../shared/widgets/fc_card.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  static final Member _user = MockMembers.all[7]; // Aaliyah Sow
-
   @override
   Widget build(BuildContext context) {
+    final suUser = Supabase.instance.client.auth.currentUser;
+    final name = suUser?.userMetadata?['full_name'] as String? ?? 
+                 suUser?.email?.split('@').first ?? 'Membre Fulɓe';
+    final defaultMember = MockMembers.all[7]; // Aaliyah Sow as fallback
+    final user = Member(
+      id: suUser?.id ?? 'current',
+      name: name,
+      profession: suUser?.userMetadata?['profession'] as String? ?? 'Membre Connecté',
+      city: suUser?.userMetadata?['city'] as String? ?? 'Dakar',
+      country: suUser?.userMetadata?['country'] as String? ?? 'Sénégal',
+      avatarUrl: suUser?.userMetadata?['avatar_url'] as String? ?? defaultMember.avatarUrl,
+      initials: name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'FC',
+      isVerified: suUser?.userMetadata?['is_verified'] as bool? ?? false,
+      skills: List<String>.from(suUser?.userMetadata?['skills'] as List? ?? ['Réseautage', 'Solidarité']),
+    );
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -22,7 +37,7 @@ class ProfileScreen extends StatelessWidget {
         leading: Padding(
           padding: const EdgeInsets.only(left: AppSpacing.marginMobile),
           child: CircleAvatar(
-            backgroundImage: NetworkImage(_user.avatarUrl ?? ''),
+            backgroundImage: NetworkImage(user.avatarUrl ?? ''),
             radius: 20,
           ),
         ),
@@ -45,15 +60,15 @@ class ProfileScreen extends StatelessWidget {
             bottom: AppSpacing.bottomNavHeight + AppSpacing.stackMd),
         children: [
           // ── Cover + Avatar header ──────────────────────────────
-          _ProfileHeader(user: _user),
+          _ProfileHeader(user: user),
           // ── Info section ──────────────────────────────────────
-          _ProfileInfo(user: _user),
+          _ProfileInfo(user: user),
           const SizedBox(height: AppSpacing.stackMd),
           // ── Professional Skills ────────────────────────────────
           _Section(
             title: 'Compétences Professionnelles',
             icon: Icons.bolt,
-            child: _SkillsSection(skills: _user.skills),
+            child: _SkillsSection(skills: user.skills),
           ),
           const SizedBox(height: AppSpacing.stackMd),
           // ── Market Services ────────────────────────────────────
@@ -129,11 +144,17 @@ class _ProfileHeader extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              // Action buttons
+              // Action buttons for self profile
               OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.chat_bubble_outline, size: 14),
-                label: const Text('Message'),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Modification du profil bientôt disponible.'),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.edit_outlined, size: 14),
+                label: const Text('Modifier'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primaryContainer,
                   side: const BorderSide(color: AppColors.primaryContainer),
@@ -147,10 +168,33 @@ class _ProfileHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.stackSm),
-              ElevatedButton(
-                onPressed: () {},
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Déconnexion'),
+                      content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Annuler', style: TextStyle(color: AppColors.primaryContainer)),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Déconnexion', style: TextStyle(color: AppColors.error)),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    await Supabase.instance.client.auth.signOut();
+                  }
+                },
+                icon: const Icon(Icons.logout, size: 14),
+                label: const Text('Déconnexion'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryContainer,
+                  backgroundColor: AppColors.error,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding:
@@ -161,7 +205,6 @@ class _ProfileHeader extends StatelessWidget {
                   ),
                   textStyle: AppTextStyles.labelSm,
                 ),
-                child: const Text('Connecter'),
               ),
             ],
           ),
@@ -211,16 +254,21 @@ class _ProfileInfo extends StatelessWidget {
               const Icon(Icons.location_on_outlined,
                   size: 14, color: AppColors.onSurfaceVariant),
               const SizedBox(width: 2),
-              Text('${user.city}, ${user.country.substring(0, 2).toUpperCase()}',
+              Text('${user.city}, ${user.country.length >= 2 ? user.country.substring(0, 2).toUpperCase() : user.country}',
                   style: AppTextStyles.labelSm
                       .copyWith(color: AppColors.onSurfaceVariant)),
               const SizedBox(width: AppSpacing.stackMd),
-              const Icon(Icons.link, size: 14, color: AppColors.primaryContainer),
-              const SizedBox(width: 2),
-              Text('aaliyah.design',
+              const Icon(Icons.email_outlined, size: 14, color: AppColors.primaryContainer),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  Supabase.instance.client.auth.currentUser?.email ?? 'aaliyah.design',
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.labelSm.copyWith(
                       color: AppColors.primaryContainer,
-                      fontWeight: FontWeight.w600)),
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -229,14 +277,19 @@ class _ProfileInfo extends StatelessWidget {
               const Icon(Icons.calendar_today_outlined,
                   size: 13, color: AppColors.onSurfaceVariant),
               const SizedBox(width: 4),
-              Text('Inscrite en 2021',
-                  style: AppTextStyles.labelSm
-                      .copyWith(color: AppColors.onSurfaceVariant)),
+              Text(
+                'Inscrit(e) en ${Supabase.instance.client.auth.currentUser?.createdAt != null ? DateTime.tryParse(Supabase.instance.client.auth.currentUser!.createdAt)!.year.toString() : "2026"}',
+                style: AppTextStyles.labelSm
+                    .copyWith(color: AppColors.onSurfaceVariant),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.stackMd),
           Text(
-            'Bridging digital experiences with cultural heritage. Specializing in inclusive UX design for global fintech platforms and providing professional Pulaar translation services to empower local communities.',
+            Supabase.instance.client.auth.currentUser?.email != null &&
+                    Supabase.instance.client.auth.currentUser?.email != 'aaliyah@example.com'
+                ? 'Membre passionné de la communauté Fulɓe Connect. Engagé à connecter, échanger et soutenir la diaspora Peule à travers le monde.'
+                : 'Bridging digital experiences with cultural heritage. Specializing in inclusive UX design for global fintech platforms and providing professional Pulaar translation services to empower local communities.',
             style: AppTextStyles.bodyMd
                 .copyWith(color: AppColors.onSurface, fontSize: 14),
           ),

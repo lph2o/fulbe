@@ -118,14 +118,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     children: [
                       _GoldCTAButton(
                         label: 'Rejoindre la communauté',
-                        onTap: () => Navigator.pushReplacementNamed(
-                            context, AppRoutes.home),
+                        onTap: () => Navigator.pushNamed(
+                            context, AppRoutes.auth, arguments: 1),
                       ),
                       const SizedBox(height: AppSpacing.stackMd),
                       _GhostCTAButton(
                         label: 'Se connecter',
-                        onTap: () => Navigator.pushReplacementNamed(
-                            context, AppRoutes.home),
+                        onTap: () => Navigator.pushNamed(
+                            context, AppRoutes.auth, arguments: 0),
                       ),
                       const SizedBox(height: AppSpacing.stackLg),
                     ],
