@@ -23,6 +23,7 @@ class Member {
     this.skills = const [],
     this.linkedIn,
     this.bio,
+    this.lastSeen,
     this.createdAt,
   });
 
@@ -38,6 +39,7 @@ class Member {
   final List<String> skills;
   final String? linkedIn;
   final String? bio;
+  final DateTime? lastSeen;
   final DateTime? createdAt;
 
   factory Member.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,8 @@ class Member {
       linkedIn: Parsers.nullableString(json, 'linkedin') ??
           Parsers.nullableString(json, 'linkedIn'),
       bio: Parsers.nullableString(json, 'bio'),
+      lastSeen: Parsers.nullableDateTime(json, 'last_seen') ??
+          Parsers.nullableDateTime(json, 'lastSeen'),
       createdAt: Parsers.nullableDateTime(json, 'created_at') ??
           Parsers.nullableDateTime(json, 'createdAt'),
     );
@@ -75,6 +79,7 @@ class Member {
         'skills': skills,
         'linkedin': linkedIn,
         'bio': bio,
+        'last_seen': lastSeen?.toIso8601String(),
         'created_at': createdAt?.toIso8601String(),
       };
 
@@ -94,6 +99,7 @@ class Member {
           listEquals(other.skills, skills) &&
           other.linkedIn == linkedIn &&
           other.bio == bio &&
+          other.lastSeen == lastSeen &&
           other.createdAt == createdAt;
 
   @override
@@ -110,6 +116,7 @@ class Member {
         Object.hashAll(skills),
         linkedIn,
         bio,
+        lastSeen,
         createdAt,
       );
 }

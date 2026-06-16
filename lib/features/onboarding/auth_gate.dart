@@ -1,8 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -90,10 +90,13 @@ class _SplashLoadingScreen extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              child: const Icon(
-                PhosphorIcons.globe,
-                size: 36,
-                color: AppColors.secondaryContainer,
+              child: ClipOval(
+                child: Image.asset(
+                  AppConstants.logoAsset,
+                  width: 66,
+                  height: 66,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.stackLg),

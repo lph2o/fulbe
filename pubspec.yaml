@@ -40,9 +40,34 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
   shared_preferences: ^2.2.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo/logo_fulbe_connect.png"
+  adaptive_icon_foreground: "assets/logo/logo_fulbe_connect.png"
+  adaptive_icon_background: "#00674F"
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/logo/logo_fulbe_connect.png"
+  macos:
+    generate: true
+    image_path: "assets/logo/logo_fulbe_connect.png"
+  windows:
+    generate: true
+    image_path: "assets/logo/logo_fulbe_connect.png"
+  linux:
+    generate: true
+    image_path: "assets/logo/logo_fulbe_connect.png"
 
 flutter:
   uses-material-design: true
+
+  # Assets — logo et ressources graphiques
+  assets:
+    - assets/logo/
 
   # Inter font embedded via assets
   fonts:

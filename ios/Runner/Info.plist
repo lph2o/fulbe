@@ -22,10 +22,31 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>app.fulbe.connect</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fulbe</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Fulbe Connect a besoin d'accéder à votre calendrier pour y ajouter les événements auxquels vous vous inscrivez.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Fulbe Connect a besoin d'accéder à votre appareil photo pour créer des posts avec des photos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Fulbe Connect a besoin d'accéder à votre micro pour enregistrer des messages vocaux.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Fulbe Connect a besoin d'accéder à votre galerie pour choisir des photos à publier.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -49,6 +70,12 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+		<string>processing</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -59,41 +86,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSCalendarsUsageDescription</key>
-	<string>Fulbe Connect a besoin d'accéder à votre calendrier pour y ajouter les événements auxquels vous vous inscrivez.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Fulbe Connect a besoin d'accéder à votre appareil photo pour créer des posts avec des photos.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Fulbe Connect a besoin d'accéder à votre micro pour enregistrer des messages vocaux.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Fulbe Connect a besoin d'accéder à votre galerie pour choisir des photos à publier.</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
-	<!-- NSUserNotificationUsageDescription n'est pas un standard iOS.
-	     Les permissions de notification sont demandées à runtime via
-	     firebase_messaging.requestPermission(). -->
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>app.fulbe.connect</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>fulbe</string>
-			</array>
-		</dict>
 	</array>
 </dict>
 </plist>

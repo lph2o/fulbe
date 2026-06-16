@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 /// Inspired by LinkedIn Premium, Stripe, Airbnb, Linear.
 abstract class AppColors {
   // ── Primary (Deep Emerald Green) ──────────────────────────────────────
-  static const Color primary = Color(0xFF0D7A4E);
+  static const Color primary = Color(0xFF00674F);
   static const Color onPrimary = Color(0xFFFFFFFF);
-  static const Color primaryContainer = Color(0xFF0D7A4E);
+  static const Color primaryContainer = Color(0xFF00674F);
   static const Color onPrimaryContainer = Color(0xFFFFFFFF);
-  static const Color inversePrimary = Color(0xFF91D5B1);
-  static const Color primaryFixed = Color(0xFFE8F5EE);
-  static const Color primaryFixedDim = Color(0xFFC3E8D3);
-  static const Color onPrimaryFixed = Color(0xFF002114);
-  static const Color onPrimaryFixedVariant = Color(0xFF0D7A4E);
+  static const Color inversePrimary = Color(0xFF66B89A);
+  static const Color primaryFixed = Color(0xFFE0F2EB);
+  static const Color primaryFixedDim = Color(0xFFB3DDCB);
+  static const Color onPrimaryFixed = Color(0xFF002116);
+  static const Color onPrimaryFixedVariant = Color(0xFF00674F);
 
   // ── Secondary (Gold Sand) ────────────────────────────────────────────
   static const Color secondary = Color(0xFFC9A84C);
@@ -62,7 +62,7 @@ abstract class AppColors {
   static const Color onErrorContainer = Color(0xFF93000A);
 
   // ── Misc ─────────────────────────────────────────────────────────────
-  static const Color surfaceTint = Color(0xFF0D7A4E);
+  static const Color surfaceTint = Color(0xFF00674F);
 
   // ── Legacy compatibility aliases ─────────────────────────────────────
   /// Legacy dark green — use [primary] (emerald) for new designs.

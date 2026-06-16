@@ -3,20 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show RealtimeChannel, PostgresChangeEvent, Supabase;
 import '../../features/home/home_screen.dart';
 import '../../features/home/create_post_screen.dart';
 import '../../features/events/create_event_screen.dart';
 import '../../features/jobs/create_job_screen.dart';
 import '../../features/marketplace/create_service_screen.dart';
 import '../../features/map/world_map_screen.dart';
-import '../../features/directory/directory_screen.dart';
+import '../../features/messages/messages_screen.dart';
 import '../../features/profile/profile_screen.dart';
 import '../data/providers/data_providers.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
-/// Main shell with premium bottom navigation bar and central elevated
-/// publish button.
 class MainShell extends ConsumerStatefulWidget {
   final int initialIndex;
   const MainShell({super.key, this.initialIndex = 0});
@@ -28,29 +27,41 @@ class MainShell extends ConsumerStatefulWidget {
 class _MainShellState extends ConsumerState<MainShell> {
   late int _tabIndex;
   late final List<Widget> _screens;
+  RealtimeChannel? _msgRealtimeChannel;
 
   @override
   void initState() {
     super.initState();
-    // initialIndex 0-4 maps to visual tabs: 0=Home, 1=Map, 2=Publish(gap),
-    // 3=Directory, 4=Profile
     _tabIndex = widget.initialIndex;
-    // Chaque instance de _MainShellState possède SA propre liste d'écrans
-    // pour éviter les conflits d'éléments quand un nouveau MainShell est
-    // poussé comme route (ex: appui sur avatar → /profile).
-    // IMPORTANT: PAS de `const` ici — deux MainShell coexistent dans l'arbre
-    // (le tab original + la route /profile poussée par-dessus) et des widgets
-    // const partagés violent l'assertion '_elements.contains(element)'.
     _screens = <Widget>[
       HomeScreen(key: ValueKey('tab_home')),
       WorldMapScreen(key: ValueKey('tab_map')),
-      DirectoryScreen(key: ValueKey('tab_directory')),
+      MessagesScreen(key: ValueKey('tab_messages')),
       ProfileScreen(key: ValueKey('tab_profile')),
     ];
+    _subscribeToMessageRealtime();
   }
 
-  /// Maps visual tab index → IndexedStack child index.
-  /// Visual indices: 0=Home→0, 1=Map→1, 2=Publish→(none), 3=Annuaire→2, 4=Profil→3
+  void _subscribeToMessageRealtime() {
+    _msgRealtimeChannel = Supabase.instance.client
+        .channel('main_shell_messages')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'messages',
+          callback: (_) {
+            if (mounted) ref.invalidate(conversationsProvider);
+          },
+        )
+        .subscribe();
+  }
+
+  @override
+  void dispose() {
+    _msgRealtimeChannel?.unsubscribe();
+    super.dispose();
+  }
+
   int _toStackIndex(int visualIndex) {
     if (visualIndex < 2) return visualIndex;
     if (visualIndex == 2) return -1; // publish button
@@ -61,7 +72,6 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   void _onVisualTap(int visualIndex) {
     if (visualIndex == 2) {
-      // Publish button — show creation menu
       _showCreateMenu();
       return;
     }
@@ -78,10 +88,10 @@ class _MainShellState extends ConsumerState<MainShell> {
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle bar
               Container(
                 width: 40,
                 height: 4,
@@ -139,7 +149,7 @@ class _MainShellState extends ConsumerState<MainShell> {
               _CreateOption(
                 icon: PhosphorIcons.briefcase,
                 color: AppColors.secondary,
-                title: 'Offre d\'emploi',
+                title: "Offre d'emploi",
                 subtitle: 'Publier une opportunité professionnelle',
                 onTap: () {
                   Navigator.pop(ctx);
@@ -162,8 +172,10 @@ class _MainShellState extends ConsumerState<MainShell> {
                   );
                 },
               ),
+
               const SizedBox(height: 8),
             ],
+          ),
           ),
         ),
       ),
@@ -216,9 +228,7 @@ class _MainShellState extends ConsumerState<MainShell> {
   }
 }
 
-// ── Premium Bottom Navigation ────────────────────────────────────────────────
-
-class _PremiumBottomNav extends StatelessWidget {
+class _PremiumBottomNav extends ConsumerWidget {
   final int currentVisualIndex;
   final ValueChanged<int> onTap;
 
@@ -227,16 +237,22 @@ class _PremiumBottomNav extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _tabs = [
+  static const    _tabs = [
     _NavTab(icon: PhosphorIcons.house, filledIcon: PhosphorIcons.houseFill, label: 'Accueil'),
     _NavTab(icon: PhosphorIcons.mapPin, filledIcon: PhosphorIcons.mapPinFill, label: 'Carte'),
-    _NavTab(icon: PhosphorIcons.addressBook, filledIcon: PhosphorIcons.addressBookFill, label: 'Annuaire'),
+    _NavTab(icon: PhosphorIcons.chatsTeardrop, filledIcon: PhosphorIcons.chatsTeardropFill, label: 'Messages'),
     _NavTab(icon: PhosphorIcons.user, filledIcon: PhosphorIcons.userFill, label: 'Profil'),
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bottomPad = MediaQuery.of(context).padding.bottom;
+
+    final conversationsAsync = ref.watch(conversationsProvider);
+    final unreadCount = conversationsAsync.whenOrNull(
+          data: (convs) => convs.where((c) => !c.isRead).length,
+        ) ??
+        0;
 
     return Container(
       height: AppSpacing.bottomNavHeight + bottomPad,
@@ -260,27 +276,23 @@ class _PremiumBottomNav extends StatelessWidget {
         padding: EdgeInsets.only(bottom: bottomPad),
         child: Row(
           children: [
-            // Tab 0 — Home
             _NavItem(
               tab: _tabs[0],
               isActive: currentVisualIndex == 0,
               onTap: () => onTap(0),
             ),
-            // Tab 1 — Map
             _NavItem(
               tab: _tabs[1],
               isActive: currentVisualIndex == 1,
               onTap: () => onTap(1),
             ),
-            // Center — Publish button
             _PublishButton(onTap: () => onTap(2)),
-            // Tab 3 (visual) → stack index 2 — Annuaire
             _NavItem(
               tab: _tabs[2],
               isActive: currentVisualIndex == 3,
               onTap: () => onTap(3),
+              badgeCount: unreadCount,
             ),
-            // Tab 4 (visual) → stack index 3 — Profil
             _NavItem(
               tab: _tabs[3],
               isActive: currentVisualIndex == 4,
@@ -300,47 +312,137 @@ class _NavTab {
   const _NavTab({required this.icon, required this.filledIcon, required this.label});
 }
 
-class _NavItem extends StatelessWidget {
+class _NavItem extends StatefulWidget {
   final _NavTab tab;
   final bool isActive;
   final VoidCallback onTap;
+  final int badgeCount;
 
   const _NavItem({
     required this.tab,
     required this.isActive,
     required this.onTap,
+    this.badgeCount = 0,
   });
+
+  @override
+  State<_NavItem> createState() => _NavItemState();
+}
+
+class _NavItemState extends State<_NavItem>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _bounceCtrl;
+  late final Animation<double> _bounceAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _bounceCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    if (widget.badgeCount > 0) {
+      _bounceCtrl.value = 1.0;
+    }
+    _bounceAnim = CurvedAnimation(
+      parent: _bounceCtrl,
+      curve: Curves.elasticOut,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _NavItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Trigger bounce when badge count increases (new notification)
+    if (widget.badgeCount > oldWidget.badgeCount) {
+      _bounceCtrl.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _bounceCtrl.dispose();
+    super.dispose();
+  }
+
+  Widget _buildBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      constraints: const BoxConstraints(minWidth: 18, minHeight: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDC3545),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Text(
+        widget.badgeCount > 99 ? '99+' : '${widget.badgeCount}',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+          height: 1.2,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: widget.onTap,
         behavior: HitTestBehavior.opaque,
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primaryFixed : Colors.transparent,
+            color: widget.isActive ? AppColors.primaryFixed : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
+            fit: StackFit.expand,
+            clipBehavior: Clip.none,
             children: [
-              Icon(
-                isActive ? tab.filledIcon : tab.icon,
-                size: 22,
-                color: isActive ? AppColors.primary : const Color(0xFFBBBBBB),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    widget.isActive ? widget.tab.filledIcon : widget.tab.icon,
+                    size: 22,
+                    color: widget.isActive ? AppColors.primary : const Color(0xFFBBBBBB),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.tab.label,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 9,
+                      fontWeight: widget.isActive ? FontWeight.w700 : FontWeight.w500,
+                      color: widget.isActive ? AppColors.primary : const Color(0xFFBBBBBB),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                tab.label,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 9,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.primary : const Color(0xFFBBBBBB),
+              if (widget.badgeCount > 0)
+                Positioned(
+                  top: -1,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: ScaleTransition(
+                      scale: _bounceAnim,
+                      child: _buildBadge(),
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -399,10 +501,6 @@ class _PublishButton extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// _CreateOption — option du menu de création
-// ─────────────────────────────────────────────────────────────────────────────
 
 class _CreateOption extends StatelessWidget {
   final IconData icon;

@@ -96,9 +96,17 @@ class ConversationsRepository {
         // Nom et avatar
         String name;
         String? avatarUrl;
+        int memberCount = 0;
 
         if (isGroup) {
           name = conv['name'] as String? ?? 'Groupe';
+          // Récupère le nombre de participants pour les groupes
+          final memberRows = await SupabaseFetchers.selectAll(
+            'conversation_participants',
+            columns: 'member_id',
+            eq: {'conversation_id': convId},
+          );
+          memberCount = memberRows.length;
         } else {
           // Pour les directs, trouver l'autre participant
           final otherMember = await findOtherParticipant(convId, currentMemberId);
@@ -126,6 +134,7 @@ class ConversationsRepository {
             unread: unread,
             isRead: unread == 0,
             isGroup: isGroup,
+            memberCount: memberCount,
           ),
           lastMessageAt: lastMessageAt ?? DateTime(2000),
         ));
@@ -150,6 +159,7 @@ class ConversationsRepository {
             unread: c.conversation.unread,
             isRead: c.conversation.isRead,
             isGroup: c.conversation.isGroup,
+            memberCount: c.conversation.memberCount,
             isCallActive: active != null,
             isGroupCall: active ?? false,
           ),

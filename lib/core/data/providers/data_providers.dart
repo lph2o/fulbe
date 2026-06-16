@@ -11,7 +11,11 @@ import '../models/organization.dart';
 import '../models/conversation.dart' show Conversation, ChatMessage;
 import '../models/post.dart' show Post, Announcement, PostComment;
 import '../models/service.dart';
+import '../models/call_entry.dart';
 import '../models/transaction.dart';
+import '../models/community.dart';
+import '../models/community_post.dart';
+import '../repositories/call_history_repository.dart';
 import '../repositories/conversations_repository.dart';
 import '../repositories/events_repository.dart';
 import '../repositories/finances_repository.dart';
@@ -21,6 +25,8 @@ import '../repositories/marketplace_repository.dart';
 import '../repositories/members_repository.dart';
 import '../repositories/organizations_repository.dart';
 import '../repositories/posts_repository.dart';
+import '../repositories/communities_repository.dart';
+import '../../errors/app_exception.dart';
 
 // ── Repositories ──────────────────────────────────────────────────────────
 
@@ -178,6 +184,14 @@ final projectsProvider = FutureProvider<List<CommunityProject>>((ref) async {
 /// Liste de tous les membres (annuaire).
 final membersProvider = FutureProvider<List<Member>>((ref) async {
   return ref.watch(membersRepositoryProvider).fetchAll();
+});
+
+/// Nombre total de membres sur la plateforme.
+///
+/// Requête COUNT légère, sans charger les profils complets.
+/// Retourne 0 en cas d'erreur (le header affiche un fallback).
+final totalMemberCountProvider = FutureProvider<int>((ref) async {
+  return ref.watch(membersRepositoryProvider).fetchTotalCount();
 });
 
 /// Clusters géographiques pour la World Map.
@@ -357,6 +371,12 @@ final memberFollowingProvider =
 
 // ── Messagerie (conversations) ────────────────────────────────────────────
 
+final callHistoryRepositoryProvider =
+    Provider<CallHistoryRepository>((ref) => const CallHistoryRepository());
+
+final communitiesRepositoryProvider =
+    Provider<CommunitiesRepository>((ref) => const CommunitiesRepository());
+
 final conversationsRepositoryProvider =
     Provider<ConversationsRepository>((ref) => const ConversationsRepository());
 
@@ -364,6 +384,123 @@ final conversationsRepositoryProvider =
 /// triées par dernier message.
 final conversationsProvider = FutureProvider<List<Conversation>>((ref) async {
   return ref.watch(conversationsRepositoryProvider).fetchAll();
+});
+
+/// Historique des appels (1-to-1) du membre courant, trié du plus récent
+/// au plus ancien. Retourne une liste vide si non authentifié.
+final callHistoryProvider = FutureProvider<List<CallEntry>>((ref) async {
+  final member = await ref.watch(currentMemberProvider.future);
+  if (member == null) {
+    print('[callHistoryProvider] Aucun membre trouvé (non connecté).');
+    return [];
+  }
+  try {
+    return await ref
+        .watch(callHistoryRepositoryProvider)
+        .fetchCallHistory(member.id);
+  } catch (e, st) {
+    final cause = e is AppException ? e.cause : null;
+    print('[callHistoryProvider] Erreur chargement historique: $e');
+    if (cause != null) {
+      print('[callHistoryProvider] Cause: $cause\nType: ${cause.runtimeType}');
+    }
+    rethrow;
+  }
+});
+
+// ── Communautés / Groupes ────────────────────────────────────────────
+
+/// Liste de toutes les communautés.
+final communitiesProvider = FutureProvider<List<Community>>((ref) async {
+  final member = await ref.watch(currentMemberProvider.future);
+  if (member == null) {
+    return ref.watch(communitiesRepositoryProvider).fetchAll();
+  }
+
+  final repo = ref.watch(communitiesRepositoryProvider);
+  final results = await Future.wait([
+    repo.fetchAll(),
+    repo.fetchJoinedIds(member.id),
+    repo.fetchAdminIds(member.id),
+  ]);
+
+  final communities = results[0] as List<Community>;
+  final joinedIds = results[1] as Set<String>;
+  final adminIds = results[2] as Set<String>;
+
+  return communities
+      .map((c) => c.copyWith(
+            isMember: joinedIds.contains(c.id),
+            isAdmin: adminIds.contains(c.id),
+          ))
+      .toList(growable: false);
+});
+
+/// Détail d'une communauté.
+final communityProvider =
+    FutureProvider.family<Community?, String>((ref, id) async {
+  final repo = ref.watch(communitiesRepositoryProvider);
+  final member = await ref.watch(currentMemberProvider.future);
+
+  final community = await repo.fetchById(id);
+  if (member == null) return community;
+
+  final results = await Future.wait([
+    repo.checkMembership(id, member.id),
+    repo.checkAdmin(id, member.id),
+  ]);
+
+  return community.copyWith(
+    isMember: results[0] as bool,
+    isAdmin: results[1] as bool,
+  );
+});
+
+/// Code d'invitation d'une communauté.
+///
+/// Retourne `null` si aucun code n'a encore été généré.
+/// Nécessite d'être admin/modérateur pour voir le code (RLS côté serveur).
+final communityInviteCodeProvider =
+    FutureProvider.family<String?, String>((ref, communityId) async {
+  return ref.watch(communitiesRepositoryProvider).getInviteCode(communityId);
+});
+
+/// Posts d'une communauté.
+final communityPostsProvider =
+    FutureProvider.family<List<CommunityPost>, String>((ref, communityId) async {
+  final member = await ref.watch(currentMemberProvider.future);
+  return ref
+      .watch(communitiesRepositoryProvider)
+      .fetchPosts(communityId, currentMemberId: member?.id);
+});
+
+/// Map : community_id → nombre de messages non lus.
+///
+/// Cross-référence entre [communitiesProvider] (pour récupérer
+/// conversation_id de chaque communauté) et [conversationsProvider]
+/// (pour le compteur `unread` de chaque conversation).
+final communityUnreadCountsProvider = Provider<Map<String, int>>((ref) {
+  final communities = ref.watch(communitiesProvider).asData?.value ?? [];
+  final conversations = ref.watch(conversationsProvider).asData?.value ?? [];
+
+  // Map : conversation_id → unread
+  final unreadByConv = <String, int>{};
+  for (final conv in conversations) {
+    if (conv.unread > 0) {
+      unreadByConv[conv.id] = conv.unread;
+    }
+  }
+
+  // Map : community_id → unread (via conversation_id)
+  final result = <String, int>{};
+  for (final community in communities) {
+    final convId = community.conversationId;
+    if (convId != null && unreadByConv.containsKey(convId)) {
+      result[community.id] = unreadByConv[convId]!;
+    }
+  }
+
+  return result;
 });
 
 /// Messages d'une conversation, du plus ancien au plus récent,

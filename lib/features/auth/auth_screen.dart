@@ -4,6 +4,7 @@ import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 // d'exceptions (voir `core/errors/app_exception.dart`), exposée via AuthService.
 
 import '../../core/auth/auth_service.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/data/countries.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/services/location_service.dart';
@@ -175,7 +176,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Header logo
+                    // Header logo — officiel Fulɓe Connect
                     Container(
                       width: 72,
                       height: 72,
@@ -187,10 +188,13 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                           width: 1.5,
                         ),
                       ),
-                      child: const Icon(
-                        PhosphorIcons.globe,
-                        size: 32,
-                        color: AppColors.secondaryContainer,
+                      child: ClipOval(
+                        child: Image.asset(
+                          AppConstants.logoAsset,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.stackMd),

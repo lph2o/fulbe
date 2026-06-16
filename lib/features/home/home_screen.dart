@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/data/models/member.dart' show Member;
 import '../../core/data/providers/data_providers.dart';
 import '../../core/errors/app_exception.dart';
@@ -50,6 +51,80 @@ Widget _sectionHeader(String title,
   );
 }
 
+// ── Header helpers ─────────────────────────────────────────────────────────
+
+String _greeting(String? name) {
+  final hour = DateTime.now().hour;
+  final timeGreeting = hour < 17 ? 'Bonjour' : 'Bonsoir';
+  if (name != null && name.isNotEmpty) {
+    final firstName = name.split(' ').first;
+    return '$timeGreeting, $firstName 👋';
+  }
+  return '$timeGreeting 👋';
+}
+
+String _formatCount(int count) {
+  if (count == 0) return 'Fulɓe dans le monde';
+  final chars = count.toString().split('').reversed.toList();
+  final buf = StringBuffer();
+  for (var i = 0; i < chars.length; i++) {
+    if (i > 0 && i % 3 == 0) buf.write(' ');
+    buf.write(chars[i]);
+  }
+  final formatted = buf.toString().split('').reversed.join();
+  return '$formatted+ Fulɓe dans le monde';
+}
+
+/// Formatte un entier avec separateur de milliers (espace insécable).
+/// "27534" → "27 534"
+String _formatNumber(int count) {
+  if (count == 0) return '—';
+  final chars = count.toString().split('').reversed.toList();
+  final buf = StringBuffer();
+  for (var i = 0; i < chars.length; i++) {
+    if (i > 0 && i % 3 == 0) buf.write(' ');
+    buf.write(chars[i]);
+  }
+  return buf.toString().split('').reversed.join();
+}
+
+Widget _headerInitials(Member? member) {
+  final letter = (member?.name ?? '?')[0].toUpperCase();
+  return Container(
+    color: AppColors.secondary,
+    child: Center(
+      child: Text(
+        letter,
+        style: const TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+    ),
+  );
+}
+
+/// Avatars initials pour la section professionnels (taille et couleurs adaptees).
+Widget _memberInitials(Member member, Color textColor, Color bgColor) {
+  final letter = (member.name)[0].toUpperCase();
+  return Container(
+    color: bgColor,
+    child: Center(
+      child: Text(
+        letter,
+        style: TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: textColor,
+        ),
+      ),
+    ),
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HomeScreen — Premium redesign
 // ─────────────────────────────────────────────────────────────────────────────
@@ -69,10 +144,10 @@ class HomeScreen extends ConsumerWidget {
         color: AppColors.primary,
         onRefresh: () async {
           ref.invalidate(postsProvider);
-          ref.invalidate(announcementsProvider);
+          ref.invalidate(eventsProvider);
           await Future.wait([
             ref.read(postsProvider.future),
-            ref.read(announcementsProvider.future),
+            ref.read(eventsProvider.future),
           ]);
         },
         child: ListView(
@@ -80,9 +155,16 @@ class HomeScreen extends ConsumerWidget {
           padding: const EdgeInsets.only(bottom: AppSpacing.stackLg),
           children: [
             // ── 1. Premium Header ──────────────────────────
-            _PremiumHeader(member: member),
+            _PremiumHeader(
+              member: member,
+              memberCount: ref.watch(totalMemberCountProvider).whenOrNull(
+                    data: (count) => _formatCount(count),
+                  ),
+            ),
             // ── 2. Hero Card ───────────────────────────────
-            _HeroCard(),
+            _HeroCard(
+              memberCount: ref.watch(totalMemberCountProvider).valueOrNull ?? 0,
+            ),
             // ── 3. Quick Actions Grid ──────────────────────
             _QuickActionsGrid(),
             // ── 4. Post Composer ───────────────────────────
@@ -156,7 +238,8 @@ class HomeScreen extends ConsumerWidget {
 
 class _PremiumHeader extends StatelessWidget {
   final Member? member;
-  const _PremiumHeader({required this.member});
+  final String? memberCount;
+  const _PremiumHeader({required this.member, this.memberCount});
 
   @override
   Widget build(BuildContext context) {
@@ -173,21 +256,27 @@ class _PremiumHeader extends StatelessWidget {
       child: Row(
         children: [
           // Logo
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: AppColors.secondary,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Center(
-              child: Text(
-                'FC',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
+          Image.asset(
+            AppConstants.logoAsset,
+            width: 32,
+            height: 32,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: AppColors.secondary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: Text(
+                  'FC',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -229,7 +318,7 @@ class _PremiumHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'Bonjour, ${member?.name.split(' ').first ?? 'Alpha'} 👋',
+                _greeting(member?.name),
                 style: const TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 12,
@@ -238,12 +327,12 @@ class _PremiumHeader extends StatelessWidget {
                 ),
               ),
               Text(
-                '25 000+ Fulɓe dans le monde',
+                memberCount ?? 'Fulɓe dans le monde',
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 9,
                   fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.75),
+                  color: Color(0xBFFFFFFF),
                 ),
               ),
             ],
@@ -252,32 +341,32 @@ class _PremiumHeader extends StatelessWidget {
           const Spacer(),
 
           // Notification bell
-          const _StatusIcon(
+          _StatusIcon(
             icon: PhosphorIcons.bell,
             showDot: true,
             dotColor: AppColors.secondary,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.notifications),
           ),
           const SizedBox(width: 10),
-          // Avatar
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.secondary,
-              border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.4), width: 2),
-            ),
-            child: Center(
-              child: Text(
-                (member?.name ?? 'A')[0].toUpperCase(),
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+          // Avatar — real photo with initials fallback
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.4), width: 2),
               ),
+              clipBehavior: Clip.antiAlias,
+              child: member?.avatarUrl != null
+                  ? Image.network(
+                      member!.avatarUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _headerInitials(member),
+                    )
+                  : _headerInitials(member),
             ),
           ),
         ],
@@ -290,33 +379,39 @@ class _StatusIcon extends StatelessWidget {
   final IconData icon;
   final bool showDot;
   final Color dotColor;
+  final VoidCallback? onTap;
   const _StatusIcon({
     required this.icon,
     this.showDot = false,
     this.dotColor = AppColors.secondary,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Icon(icon, color: Colors.white, size: 20),
-        if (showDot)
-          Positioned(
-            top: -2,
-            right: -2,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: dotColor,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.primary, width: 1.5),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          if (showDot)
+            Positioned(
+              top: -2,
+              right: -2,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: dotColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.primary, width: 1.5),
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -324,7 +419,8 @@ class _StatusIcon extends StatelessWidget {
 // ── Hero Card ───────────────────────────────────────────────────────────────
 
 class _HeroCard extends StatelessWidget {
-  const _HeroCard();
+  final int memberCount;
+  const _HeroCard({required this.memberCount});
 
   @override
   Widget build(BuildContext context) {
@@ -390,14 +486,14 @@ class _HeroCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               // Stats grid 2 rows × 2 columns
-              const Column(
+              Column(
                 children: [
                   // Row 1: membres + pays (gold)
                   Row(
                     children: [
                       Expanded(
                         child: _HeroStat(
-                          value: '27 534',
+                          value: _formatNumber(memberCount),
                           label: 'membres',
                           isGold: true,
                         ),
@@ -437,22 +533,26 @@ class _HeroCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               // CTA button
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary,
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: const Text(
-                    'Explorer la communauté  →',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+              GestureDetector(
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.directory),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    child: const Text(
+                      'Explorer la communauté  →',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -579,6 +679,13 @@ class _QuickActionsGrid extends StatelessWidget {
       iconBg: AppColors.tealFixed,
       iconColor: AppColors.teal,
       route: AppRoutes.map,
+    ),
+    _QuickAction(
+      icon: PhosphorIcons.usersThree,
+      label: 'Communautés',
+      iconBg: AppColors.purpleFixed,
+      iconColor: AppColors.purple,
+      route: AppRoutes.communities,
     ),
   ];
 
@@ -761,17 +868,14 @@ class _PostComposer extends ConsumerWidget {
                     shape: BoxShape.circle,
                     color: AppColors.secondary,
                   ),
-                  child: Center(
-                    child: Text(
-                      (member?.name ?? 'A')[0].toUpperCase(),
-                      style: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: member?.avatarUrl != null
+                      ? Image.network(
+                          member!.avatarUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _headerInitials(member),
+                        )
+                      : _headerInitials(member),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -835,8 +939,13 @@ class _PostComposer extends ConsumerWidget {
                 icon: PhosphorIcons.calendar,
                 label: 'Événement',
                 color: AppColors.secondary,
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.events),
+                onTap: () async {
+                  final created = await Navigator.pushNamed(
+                      context, AppRoutes.createPost);
+                  if (created == true && context.mounted) {
+                    ref.invalidate(postsProvider);
+                  }
+                },
               ),
             ],
           ),
@@ -896,9 +1005,9 @@ class _EventsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final announcements = ref.watch(announcementsProvider).valueOrNull ?? [];
+    final events = ref.watch(eventsProvider).valueOrNull ?? [];
 
-    if (announcements.isEmpty) return const SizedBox.shrink();
+    if (events.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -914,83 +1023,93 @@ class _EventsSection extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.marginMobile),
-            itemCount: (announcements.length).clamp(0, 5),
+            itemCount: (events.length).clamp(0, 5),
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (_, i) {
-              final a = announcements[i];
-              // Cycle through colors
-              final colors = [
-                AppColors.primary,
-                AppColors.secondary,
-                AppColors.tertiary,
-              ];
-              final color = colors[i % colors.length];
+              final e = events[i];
+              final color = _categoryColor(e.category);
               return SizedBox(
                 width: 160,
-                child: Container(                      decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: Colors.black.withValues(alpha: 0.07),
-                        width: 0.5),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.10),
-                        blurRadius: 24,
-                        offset: const Offset(0, 6),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        height: 72,
-                        color: color,
-                        child: Center(
-                          child: Icon(
-                            _eventIcon(a.chipLabel),
-                            color: Colors.white,
-                            size: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                      context, AppRoutes.events),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Colors.black.withValues(alpha: 0.07),
+                          width: 0.5),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.10),
+                          blurRadius: 24,
+                          offset: const Offset(0, 6),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          height: 72,
+                          color: color,
+                          child: Center(
+                            child: Icon(
+                              _eventIcon(e.category),
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              a.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.onSurface,
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                e.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.onSurface,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              a.chipLabel,
-                              style: const TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 10,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.onSurfaceVariant,
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(PhosphorIcons.mapPin,
+                                      size: 10,
+                                      color: AppColors.onSurfaceVariant),
+                                  const SizedBox(width: 2),
+                                  Expanded(
+                                    child: Text(
+                                      e.location,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppColors.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -1001,15 +1120,20 @@ class _EventsSection extends ConsumerWidget {
     );
   }
 
-  IconData _eventIcon(String label) {
-    final l = label.toLowerCase();
-    if (l.contains('rencontre') || l.contains('event')) {
-      return PhosphorIcons.mapPin;
-    }
-    if (l.contains('forum') || l.contains('entrepreneur')) {
-      return PhosphorIcons.buildings;
-    }
-    return PhosphorIcons.clock;
+  Color _categoryColor(String category) {
+    final c = category.toLowerCase();
+    if (c.contains('conf') || c.contains('rencontre')) return AppColors.primary;
+    if (c.contains('festival') || c.contains('culturel')) return AppColors.secondary;
+    if (c.contains('webinaire') || c.contains('tech')) return AppColors.tertiary;
+    return AppColors.primary;
+  }
+
+  IconData _eventIcon(String category) {
+    final c = category.toLowerCase();
+    if (c.contains('conf') || c.contains('rencontre')) return PhosphorIcons.users;
+    if (c.contains('festival') || c.contains('culturel')) return PhosphorIcons.musicNotes;
+    if (c.contains('webinaire') || c.contains('tech')) return PhosphorIcons.monitorPlay;
+    return PhosphorIcons.calendar;
   }
 }
 
@@ -1058,105 +1182,107 @@ class _ProfessionalsSection extends ConsumerWidget {
 
               return SizedBox(
                 width: 90,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: Colors.black.withValues(alpha: 0.07),
-                        width: 0.5),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.10),
-                        blurRadius: 24,
-                        offset: const Offset(0, 6),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: pastel,
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                      context, AppRoutes.publicProfile,
+                      arguments: m.id),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Colors.black.withValues(alpha: 0.07),
+                          width: 0.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.10),
+                          blurRadius: 24,
+                          offset: const Offset(0, 6),
                         ),
-                        child: Center(
-                          child: Text(
-                            m.initials ?? '?',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: accent,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        m.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        m.profession,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 9,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.onSurfaceVariant,
-                        ),
-                      ),
-                      if (m.isVerified) ...[
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: pastel,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(PhosphorIcons.sealCheck,
-                                  size: 8, color: accent),
-                              const SizedBox(width: 2),
-                              Text(
-                                'Pro',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w700,
-                                  color: accent,
-                                ),
-                              ),
-                            ],
-                          ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: m.avatarUrl != null
+                              ? Image.network(
+                                  m.avatarUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      _memberInitials(m, accent, pastel),
+                                )
+                              : _memberInitials(m, accent, pastel),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          m.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          m.profession,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 9,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                        if (m.isVerified) ...[
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: pastel,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(PhosphorIcons.sealCheck,
+                                    size: 8, color: accent),
+                                const SizedBox(width: 2),
+                                Text(
+                                  'Pro',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w700,
+                                    color: accent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                     ],
                   ),
                 ),
-              );
+              ),
+            );
             },
           ),
         ),

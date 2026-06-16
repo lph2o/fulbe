@@ -793,7 +793,7 @@ class _FeedCardState extends State<_FeedCard> {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF0D7A4E), Color(0xFF085041)],
+                colors: [Color(0xFF00674F), Color(0xFF004D3A)],
               ),
             ),
             child: const Center(

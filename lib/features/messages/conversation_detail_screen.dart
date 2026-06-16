@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
@@ -18,10 +20,13 @@ import '../../core/data/repositories/conversations_repository.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/services/call_service.dart';
 import '../../core/services/group_call_service.dart';
+import '../../core/services/presence_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/navigation/app_router.dart';
+import '../../shared/widgets/attachment_sheet.dart';
+import '../../shared/widgets/presence_indicator.dart';
 import '../../shared/widgets/voice_message_bubble.dart';
 import '../../shared/widgets/voice_recorder_bar.dart';
 
@@ -53,13 +58,25 @@ class _ConversationDetailScreenState
   bool _isGroup = false;
   List<Member> _allParticipants = [];
 
+  // ── Présence en ligne ────────────────────────────────────────────────
+  StreamSubscription<Map<String, DateTime>>? _presenceSub;
+  bool _otherIsOnline = false;
+  String _presenceText = '';
+
   // ── État de l'enregistrement vocal ────────────────────────────────
   bool _isRecording = false;
   bool _isPaused = false;
   Duration _elapsed = Duration.zero;
   bool _isUploading = false;
+  String? _uploadFileName;
+  String? _uploadFileSize;
   Timer? _recordingTimer;
   String? _recordingPath;
+
+  final _imagePicker = ImagePicker();
+
+  /// Légende temporaire saisie dans la preview sheet.
+  String? _pendingCaption;
 
   RealtimeChannel? _messagesChannel;
 
@@ -75,6 +92,7 @@ class _ConversationDetailScreenState
     _initializeCallService();
     _initializeGroupCallService();
     _cacheOtherParticipant();
+    _startPresenceTracking();
   }
 
   @override
@@ -85,6 +103,8 @@ class _ConversationDetailScreenState
     _focusNode.dispose();
     _recordingTimer?.cancel();
     _audioRecorder.dispose();
+    _presenceSub?.cancel();
+    PresenceService.instance.stop();
     CallService.instance.stopListening();
     GroupCallService.instance.stopListening();
     super.dispose();
@@ -126,8 +146,40 @@ class _ConversationDetailScreenState
       member.id,
     );
     if (mounted) {
-      setState(() => _otherParticipant = other);
+      setState(() {
+        _otherParticipant = other;
+        if (other != null) {
+          // Initialise la présence depuis le cache
+          final lastSeen = PresenceService.instance.lastSeenOf(other.id);
+          if (lastSeen != null) {
+            _otherIsOnline = PresenceService.instance.isOnline(other.id);
+            _presenceText = PresenceService.instance.presenceText(other.id);
+          }
+          // Lance la surveillance Realtime maintenant que l'ID est connu
+          PresenceService.instance.watch({other.id});
+        }
+      });
     }
+  }
+
+  // ── Présence en ligne ─────────────────────────────────────────────────
+
+  void _startPresenceTracking() {
+    // Démarre le heartbeat et la surveillance de l'autre participant
+    _presenceSub = PresenceService.instance.presenceStream.listen((cache) {
+      if (!mounted || _otherParticipant == null) return;
+      final id = _otherParticipant!.id;
+      if (cache.containsKey(id)) {
+        setState(() {
+          _otherIsOnline = PresenceService.instance.isOnline(id);
+          _presenceText = PresenceService.instance.presenceText(id);
+        });
+      }
+    });
+
+    // Démarre le heartbeat ; le watch sera ajouté dès que
+    // _cacheOtherParticipant aura résolu.
+    PresenceService.instance.start();
   }
 
   // ── Load messages ──────────────────────────────────────────────────────
@@ -351,7 +403,9 @@ class _ConversationDetailScreenState
 
     // Vérifie la durée minimale (300ms)
     if (duration.inMilliseconds < 300 || finalPath == null) {
-      if (mounted) setState(() => _isUploading = false);
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
       return;
     }
 
@@ -364,7 +418,9 @@ class _ConversationDetailScreenState
         );
       }
     } finally {
-      if (mounted) setState(() => _isUploading = false);
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
     }
   }
 
@@ -413,6 +469,219 @@ class _ConversationDetailScreenState
     try {
       await file.delete();
     } catch (_) {}
+  }
+
+  // ── Attach file (image / vidéo / document) ──────────────────────────
+
+  /// Ouvre un bottom sheet pour choisir le type de pièce jointe,
+  /// puis déclenche le picker natif, affiche une prévisualisation
+  /// avec confirmation "Envoyer", puis upload et envoi.
+  Future<void> _onAttachFile() async {
+    final choice = await showModalBottomSheet<AttachmentType>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const AttachmentSheet(),
+    );
+
+    if (choice == null || !mounted) return;
+
+    final currentMember = ref.read(currentMemberProvider).asData?.value;
+    if (currentMember == null) return;
+
+    File? file;
+    String? fileName;
+    String metadataType;
+
+    switch (choice) {
+      case AttachmentType.photo:
+        final xFile = await _imagePicker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 85,
+        );
+        if (xFile == null) return;
+        file = File(xFile.path);
+        fileName = 'photos/${currentMember.id}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        metadataType = 'image';
+        break;
+
+      case AttachmentType.gallery:
+        final xFile = await _imagePicker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 85,
+        );
+        if (xFile == null) return;
+        file = File(xFile.path);
+        final ext = xFile.path.split('.').last;
+        fileName = 'photos/${currentMember.id}/${DateTime.now().millisecondsSinceEpoch}.$ext';
+        metadataType = 'image';
+        break;
+
+      case AttachmentType.video:
+        final xFile = await _imagePicker.pickVideo(
+          source: ImageSource.gallery,
+        );
+        if (xFile == null) return;
+        file = File(xFile.path);
+        final ext = xFile.path.split('.').last;
+        fileName = 'videos/${currentMember.id}/${DateTime.now().millisecondsSinceEpoch}.$ext';
+        metadataType = 'video';
+        break;
+
+      case AttachmentType.document:
+        final result = await FilePicker.platform.pickFiles();
+        if (result == null || result.files.isEmpty) return;
+        final picked = result.files.first;
+        if (picked.path == null) return;
+        file = File(picked.path!);
+        fileName = 'docs/${currentMember.id}/${DateTime.now().millisecondsSinceEpoch}_${picked.name}';
+        metadataType = 'file';
+        break;
+    }
+
+    if (!mounted) return;
+
+    // Pour les images et vidéos : afficher la prévisualisation avec confirmation
+    if (metadataType == 'image' || metadataType == 'video') {
+      if (!mounted) return;
+      String? caption;
+      // Boucle de prévisualisation : permet de re-pick si l'utilisateur
+      // clique sur le bouton retake dans la preview.
+      while (true) {
+        // Pré-calcule la taille pour l'afficher dans la preview
+        String previewSize;
+        try {
+          previewSize = _formatFileSize(await file!.length());
+        } catch (_) {
+          previewSize = '—';
+        }
+        if (!mounted) return;
+
+        caption = await showModalBottomSheet<String?>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => SendPreviewSheet(
+            file: file!,
+            fileName: fileName!,
+            metadataType: metadataType,
+            fileSize: previewSize,
+          ),
+        );
+
+        if (caption == null || !mounted) return;
+
+        // L'utilisateur veut reprendre la photo/vidéo
+        if (caption == SendPreviewSheetState.repickSentinel) {
+          if (!mounted) return;
+          final xFile = choice == AttachmentType.photo
+              ? await _imagePicker.pickImage(
+                  source: ImageSource.camera,
+                  imageQuality: 85,
+                )
+              : metadataType == 'video'
+                  ? await _imagePicker.pickVideo(
+                      source: ImageSource.gallery,
+                    )
+                  : await _imagePicker.pickImage(
+                      source: ImageSource.gallery,
+                      imageQuality: 85,
+                    );
+          if (xFile == null || !mounted) return;
+          file = File(xFile.path);
+          final ext = xFile.path.split('.').last;
+          fileName = choice == AttachmentType.photo
+              ? 'photos/${currentMember.id}/${DateTime.now().millisecondsSinceEpoch}.jpg'
+              : metadataType == 'video'
+                  ? 'videos/${currentMember.id}/${DateTime.now().millisecondsSinceEpoch}.$ext'
+                  : 'photos/${currentMember.id}/${DateTime.now().millisecondsSinceEpoch}.$ext';
+          continue; // re-affiche la preview avec le nouveau fichier
+        }
+
+        break; // l'utilisateur a confirmé l'envoi
+      }
+      _pendingCaption = caption;
+    }
+
+    await _uploadAndSendFile(file!, fileName!, metadataType, currentMember.id);
+    _pendingCaption = null;
+  }
+
+  /// Upload un fichier vers Supabase Storage puis envoie le message.
+  Future<void> _uploadAndSendFile(
+    File file,
+    String fileName,
+    String metadataType,
+    String memberId,
+  ) async {
+    // Affiche la barre de progression immédiatement
+    final displayName = fileName.split('/').last;
+    setState(() {
+      _isUploading = true;
+      _uploadFileName = displayName;
+      _uploadFileSize = 'Calcul…';
+    });
+
+    // Calcule la taille du fichier puis met à jour l'affichage
+    final fileSize = await file.length();
+    if (mounted) {
+      setState(() => _uploadFileSize = _formatFileSize(fileSize));
+    }
+
+    try {
+      await Supabase.instance.client.storage
+          .from('attachments')
+          .upload(fileName, file,
+              fileOptions: const FileOptions(upsert: false));
+
+      final publicUrl = Supabase.instance.client.storage
+          .from('attachments')
+          .getPublicUrl(fileName);
+
+      final metadata = <String, dynamic>{
+        'msg_type': metadataType,
+      };
+
+      if (metadataType == 'file') {
+        metadata['file_name'] = fileName.split('/').last;
+      }
+
+      // Ajoute la légende si présente
+      final caption = _pendingCaption?.trim();
+      if (caption != null && caption.isNotEmpty) {
+        metadata['caption'] = caption;
+      }
+
+      await _repo.sendMessage(
+        conversationId: widget.conversationId,
+        senderMemberId: memberId,
+        content: publicUrl,
+        metadata: metadata,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de l\'envoi : $e')),
+        );
+      }
+    }    finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+          _uploadFileName = null;
+          _uploadFileSize = null;
+        });
+      }
+    }
+  }
+
+  /// Formate une taille de fichier en chaîne lisible.
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes o';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} Ko';
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} Mo';
+    }
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} Go';
   }
 
   // ── Send message ───────────────────────────────────────────────────────
@@ -932,10 +1201,24 @@ class _ConversationDetailScreenState
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                displayName,
-                style: AppTextStyles.headlineMd,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    displayName,
+                    style: AppTextStyles.headlineMd,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (!_isGroup && _presenceText.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 1),
+                      child: PresenceIndicator(
+                        isOnline: _otherIsOnline,
+                        presenceText: _presenceText,
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
@@ -979,6 +1262,9 @@ class _ConversationDetailScreenState
             isPaused: _isPaused,
             elapsed: _elapsed,
             isLoading: _isUploading,
+            uploadFileName: _uploadFileName,
+            uploadFileSize: _uploadFileSize,
+            onAttach: _onAttachFile,
             onStartRecording: _startVoiceRecording,
             onVoiceMessageRecorded: (duration) {
               // Appelé quand l'utilisateur relâche après un appui long
@@ -1420,3 +1706,4 @@ class _ConversationDetailScreenState
   }
 
 }
+

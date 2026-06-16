@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:flutter/services.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
@@ -89,7 +89,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Logo orb
+                        // Logo — officiel Fulɓe Connect avec animation pulse
                         _LogoOrb(pulseAnimation: _pulseAnimation),
                         const SizedBox(height: AppSpacing.stackLg),
                         // Title
@@ -252,7 +252,7 @@ class _LogoOrb extends StatelessWidget {
                   ),
                 ),
               ),
-              // Main orb
+              // Main orb — logo officiel Fulɓe Connect
               Container(
                 width: 96,
                 height: 96,
@@ -272,10 +272,13 @@ class _LogoOrb extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  PhosphorIcons.globe,
-                  size: 48,
-                  color: AppColors.secondaryContainer,
+                child: ClipOval(
+                  child: Image.asset(
+                    AppConstants.logoAsset,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ],

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "510249120922",
+    "project_id": "fulbe-cb9fb",
+    "storage_bucket": "fulbe-cb9fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510249120922:android:fe893e402b76dd52abdb23",
+        "android_client_info": {
+          "package_name": "com.example.fulbe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYpgz4LqmqImNUynRwVGvV6aSQHVmK5d8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

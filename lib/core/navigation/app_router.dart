@@ -30,6 +30,13 @@ import '../../features/messages/active_call_screen.dart';
 import '../../features/messages/group_incoming_call_screen.dart';
 import '../../features/messages/group_outgoing_call_screen.dart';
 import '../../features/messages/group_active_call_screen.dart';
+import '../../features/notifications/notifications_screen.dart';
+import '../../features/communities/communities_screen.dart';
+import '../../features/communities/community_detail_screen.dart';
+import '../../features/communities/community_members_screen.dart';
+import '../../features/communities/community_settings_screen.dart';
+import '../../features/communities/create_community_screen.dart';
+import '../../core/data/models/community.dart';
 import '../../core/services/call_service.dart';
 import '../../core/services/group_call_service.dart';
 import '../../features/events/events_screen.dart';
@@ -70,6 +77,12 @@ abstract class AppRoutes {
   static const groupIncomingCall = '/group-incoming-call';
   static const groupOutgoingCall = '/group-outgoing-call';
   static const groupActiveCall = '/group-active-call';
+  static const communities = '/communities';
+  static const communityDetail = '/community-detail';
+  static const communityMembers = '/community-members';
+  static const communitySettings = '/community-settings';
+  static const createCommunity = '/create-community';
+  static const notifications = '/notifications';
 }
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -212,6 +225,26 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         callData: args['callData'] as GroupCallData,
         onEndCall: args['onEndCall'] as VoidCallback,
       ));
+    case AppRoutes.communities:
+      return MaterialPageRoute(builder: (_) => const CommunitiesScreen());
+    case AppRoutes.communityDetail:
+      return _slideUpRoute(CommunityDetailScreen(
+        communityId: settings.arguments as String,
+      ));
+    case AppRoutes.communityMembers:
+      final args = settings.arguments as Map<String, dynamic>;
+      return _slideUpRoute(CommunityMembersScreen(
+        communityId: args['communityId'] as String,
+        isAdmin: args['isAdmin'] as bool? ?? false,
+      ));
+    case AppRoutes.communitySettings:
+      return _slideUpRoute(CommunitySettingsScreen(
+        community: settings.arguments as Community,
+      ));
+    case AppRoutes.createCommunity:
+      return _slideUpRoute(const CreateCommunityScreen());
+    case AppRoutes.notifications:
+      return _slideUpRoute(const NotificationsScreen());
     default:
       return _fadeRoute(AuthGate());
   }

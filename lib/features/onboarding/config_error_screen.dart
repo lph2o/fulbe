@@ -34,24 +34,32 @@ class ConfigErrorScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Spacer(flex: 1),
-                // ── Icon ──────────────────────────────────────────
+                // ── Logo + Icon ────────────────────────────────
                 Center(
-                  child: Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.error.withValues(alpha: 0.12),
-                      border: Border.all(
-                        color: AppColors.error.withValues(alpha: 0.45),
-                        width: 1.5,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.error.withValues(alpha: 0.12),
+                          border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.45),
+                            width: 1.5,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: const Icon(
-                      PhosphorIcons.cloudSlash,
-                      size: 44,
-                      color: AppColors.secondaryContainer,
-                    ),
+                      ClipOval(
+                        child: Image.asset(
+                          AppConstants.logoAsset,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: AppSpacing.stackLg),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
@@ -62,13 +63,25 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
             ),
-      title: Text(
-        title,
-        style: AppTextStyles.headlineLgMobile.copyWith(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.5,
-        ),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            AppConstants.logoAsset,
+            width: 28,
+            height: 28,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: AppTextStyles.headlineLgMobile.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ],
       ),
       centerTitle: true,
       actions: [

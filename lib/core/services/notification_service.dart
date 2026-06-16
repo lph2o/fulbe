@@ -126,7 +126,7 @@ class NotificationService {
   static final NotificationService _instance = NotificationService._();
   static NotificationService get instance => _instance;
 
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  late final FirebaseMessaging _firebaseMessaging;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
@@ -146,6 +146,7 @@ class NotificationService {
     // 1. Firebase Core
     try {
       await Firebase.initializeApp();
+      _firebaseMessaging = FirebaseMessaging.instance;
     } catch (e) {
       debugPrint('[NotificationService] Firebase non configuré: $e');
       return;

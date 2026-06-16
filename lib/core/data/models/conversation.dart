@@ -22,6 +22,7 @@ class Conversation {
     this.isGroup = false,
     this.isCallActive = false,
     this.isGroupCall = false,
+    this.memberCount = 0,
   });
 
   final String id;
@@ -38,6 +39,9 @@ class Conversation {
 
   /// Si [isCallActive], précise s'il s'agit d'un appel de groupe.
   final bool isGroupCall;
+
+  /// Nombre de participants (utile pour l'affichage des groupes).
+  final int memberCount;
 
   /// Construit une [Conversation] depuis le résultat d'une requête Supabase
   /// qui joint les tables conversations + participants + messages.

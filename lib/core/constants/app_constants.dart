@@ -87,6 +87,10 @@ abstract class AppConstants {
       agoraAppCertificate.isNotEmpty &&
       agoraAppCertificate != 'placeholder_agora_certificate';
 
+  // ── Branding / Logo ───────────────────────────────────────────────────
+  /// Chemin vers le logo officiel Fulɓe Connect.
+  static const String logoAsset = 'assets/logo/logo_fulbe_connect.png';
+
   // ── App ───────────────────────────────────────────────────────────────
   static const String appName = 'Fulɓe Connect';
 

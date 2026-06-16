@@ -80,6 +80,12 @@ class VoiceRecorderBar extends StatefulWidget {
   /// de fin de ligne (upload d'image, vidéo ou message vocal en cours).
   final bool isLoading;
 
+  /// Nom du fichier en cours d'upload (affiché dans la barre de progression).
+  final String? uploadFileName;
+
+  /// Taille du fichier en cours d'upload, formatée (ex: "2.4 MB").
+  final String? uploadFileSize;
+
   const VoiceRecorderBar({
     super.key,
     this.textController,
@@ -98,6 +104,8 @@ class VoiceRecorderBar extends StatefulWidget {
     this.onDelete,
     this.onSend,
     this.isLoading = false,
+    this.uploadFileName,
+    this.uploadFileSize,
   });
 
   @override
@@ -318,15 +326,26 @@ class _VoiceRecorderBarState extends State<VoiceRecorderBar>
   }
 
   Widget _buildBar() {
-    return AnimatedSwitcher(
-      duration: _animDuration,
-      switchInCurve: _animCurve,
-      switchOutCurve: _animCurve,
-      transitionBuilder: (child, animation) =>
-          FadeTransition(opacity: animation, child: child),
-      child: _state == _RecState.locked
-          ? _buildLockedRow(key: const ValueKey('locked'))
-          : _buildStandardRow(key: const ValueKey('standard')),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ── Barre de progression upload ───────────────────
+        if (widget.isLoading &&
+            _state == _RecState.idle &&
+            widget.uploadFileName != null)
+          _buildUploadProgressBar(),
+        // ── Barre standard ───────────────────────────────
+        AnimatedSwitcher(
+          duration: _animDuration,
+          switchInCurve: _animCurve,
+          switchOutCurve: _animCurve,
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: _state == _RecState.locked
+              ? _buildLockedRow(key: const ValueKey('locked'))
+              : _buildStandardRow(key: const ValueKey('standard')),
+        ),
+      ],
     );
   }
 
@@ -525,6 +544,96 @@ class _VoiceRecorderBarState extends State<VoiceRecorderBar>
                 icon: PhosphorIcons.microphone,
                 filled: false,
               ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // BARRE DE PROGRESSION UPLOAD
+  // -------------------------------------------------------------
+  Widget _buildUploadProgressBar() {
+    final fileName = widget.uploadFileName ?? '';
+    final fileSize = widget.uploadFileSize ?? '';
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(2, 0, 2, 2),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primaryFixed,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          // Icône fichier
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),              child: const Icon(
+                PhosphorIcons.fileArrowUp,
+                color: AppColors.primary,
+                size: 20,
+              ),
+          ),
+          const SizedBox(width: 12),
+          // Infos fichier + barre
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Nom du fichier
+                Text(
+                  fileName,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                // Taille + barre
+                Row(
+                  children: [
+                    if (fileSize.isNotEmpty) ...[
+                      Text(
+                        fileSize,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: const LinearProgressIndicator(
+                          minHeight: 4,
+                          backgroundColor: AppColors.primaryFixedDim,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Envoi en cours…',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

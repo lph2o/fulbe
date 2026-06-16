@@ -54,6 +54,23 @@ class MembersRepository {
     }
   }
 
+  /// Récupère le nombre total de membres sur la plateforme.
+  ///
+  /// Utilise le COUNT exact PostgREST. Retourne 0 en cas d'erreur
+  /// pour ne pas bloquer l'affichage du header.
+  Future<int> fetchTotalCount() async {
+    try {
+      final data = await SupabaseFetchers.client
+          .from('members')
+          .select('id')
+          .limit(0)
+          .count(CountOption.exact);
+      return (data as dynamic).count as int? ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   /// Récupère les clusters géographiques (World Map).
   Future<List<MemberCluster>> fetchClusters() async {
     try {
