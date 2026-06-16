@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -54,14 +57,14 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     if (!_initialized) {
-      return const _SplashLoadingScreen();
+      return _SplashLoadingScreen();
     }
 
     if (_session != null) {
-      return const MainShell(initialIndex: 0);
+      return MainShell(initialIndex: 0);
     }
 
-    return const WelcomeScreen();
+    return WelcomeScreen();
   }
 }
 
@@ -88,7 +91,7 @@ class _SplashLoadingScreen extends StatelessWidget {
                 ),
               ),
               child: const Icon(
-                Icons.public,
+                PhosphorIcons.globe,
                 size: 36,
                 color: AppColors.secondaryContainer,
               ),

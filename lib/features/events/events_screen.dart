@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
+import '../../core/data/models/event.dart';
+import '../../core/data/providers/data_providers.dart';
+import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/data/mock_events.dart';
+import '../../shared/widgets/app_top_bar.dart';
 import '../../shared/widgets/fc_card.dart';
 import '../../shared/widgets/fc_chip.dart';
+import '../../core/navigation/app_router.dart';
 import '../../shared/widgets/fc_search_bar.dart';
+import '../../shared/widgets/ticket_dialog.dart' show showTicketDialog;
 
-class EventsScreen extends StatefulWidget {
+class EventsScreen extends ConsumerStatefulWidget {
   const EventsScreen({super.key});
 
   @override
-  State<EventsScreen> createState() => _EventsScreenState();
+  ConsumerState<EventsScreen> createState() => _EventsScreenState();
 }
 
-class _EventsScreenState extends State<EventsScreen> {
+class _EventsScreenState extends ConsumerState<EventsScreen> {
   int _selectedCategoryIndex = 0;
   String _query = '';
-  late List<Event> _events;
+  bool _isToggling = false;
 
   static const _categories = [
     'Tous',
@@ -28,25 +36,17 @@ class _EventsScreenState extends State<EventsScreen> {
     'Réunion',
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _events = List.from(MockEvents.all);
-  }
+  List<Event> _filter(List<Event> list) {
+    var filtered = list;
 
-  List<Event> get _filteredEvents {
-    var list = _events;
-
-    // Filter by category
     if (_selectedCategoryIndex > 0) {
       final selectedCategory = _categories[_selectedCategoryIndex];
-      list = list.where((e) => e.category == selectedCategory).toList();
+      filtered = filtered.where((e) => e.category == selectedCategory).toList();
     }
 
-    // Filter by search query
     if (_query.isNotEmpty) {
       final q = _query.toLowerCase();
-      list = list
+      filtered = filtered
           .where((e) =>
               e.title.toLowerCase().contains(q) ||
               e.description.toLowerCase().contains(q) ||
@@ -54,56 +54,61 @@ class _EventsScreenState extends State<EventsScreen> {
           .toList();
     }
 
-    return list;
+    return filtered;
   }
 
-  void _toggleRsvp(int index, Event event) {
-    setState(() {
-      final isNowRsvped = !event.isRsvped;
-      _events[index] = event.copyWith(
-        isRsvped: isNowRsvped,
-        attendeeCount: event.attendeeCount + (isNowRsvped ? 1 : -1),
-      );
+  Future<void> _toggleRsvp(Event event) async {
+    if (_isToggling) return;
+    setState(() => _isToggling = true);
 
-      if (isNowRsvped) {
-        _showTicketDialog(context, _events[index]);
+    try {
+      final repo = ref.read(eventsRepositoryProvider);
+      await repo.toggleRsvp(event.id, !event.isRsvped);
+
+      // Invalide le provider pour recharger avec les données à jour
+      ref.invalidate(eventsProvider);
+      await ref.read(eventsProvider.future);
+
+      if (!event.isRsvped && mounted) {
+        final member = ref.read(currentMemberProvider).valueOrNull;
+        final attendeeName = member?.name ?? 'Participant';
+        showTicketDialog(context, event: event, attendeeName: attendeeName);
       }
-    });
+    } on AppException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isToggling = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _filteredEvents;
+    final asyncEvents = ref.watch(eventsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.95),
-        elevation: 0.5,
-        centerTitle: true,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: AppSpacing.marginMobile),
-          child: CircleAvatar(
-            backgroundImage: NetworkImage(
-                'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=150&h=150&fit=crop&q=80'),
-            radius: 20,
-          ),
+      appBar: const AppTopBar(showBack: true),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final created = await Navigator.of(context)
+              .pushNamed(AppRoutes.createEvent);
+          if (created == true && mounted) {
+            ref.invalidate(eventsProvider);
+          }
+        },
+        backgroundColor: AppColors.primaryContainer,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        title: Text(
-          'Fulɓe Connect',
-          style: AppTextStyles.headlineLgMobile.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined,
-                color: AppColors.onSurfaceVariant),
-            onPressed: () {},
-            padding: const EdgeInsets.only(right: AppSpacing.marginMobile),
-          ),
-        ],
+        child: const Icon(PhosphorIcons.plus, size: 24),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,10 +132,40 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  'Participez aux rassemblements de la communauté.',
-                  style: AppTextStyles.bodyMd
-                      .copyWith(color: AppColors.onSurfaceVariant),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Participez aux rassemblements de la communauté.',
+                        style: AppTextStyles.bodyMd
+                            .copyWith(color: AppColors.onSurfaceVariant),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pushNamed(AppRoutes.myEvents),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryFixed,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(PhosphorIcons.calendarCheck, size: 14, color: AppColors.primary),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Mes événements',
+                              style: AppTextStyles.labelSm.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: AppSpacing.stackMd),
                 FcSearchBar(
@@ -148,11 +183,21 @@ class _EventsScreenState extends State<EventsScreen> {
                 setState(() => _selectedCategoryIndex = i),
           ),
           const SizedBox(height: AppSpacing.stackMd),
-          // ── Event list ─────────────────────────────────────────
+          // ── Event list (Riverpod) ──────────────────────────────
           Expanded(
-            child: filtered.isEmpty
-                ? const _EmptyEventsState()
-                : ListView.separated(
+            child: asyncEvents.when(
+              data: (events) {
+                final filtered = _filter(events);
+                if (filtered.isEmpty) {
+                  return const _EmptyEventsState();
+                }
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(eventsProvider);
+                    await ref.read(eventsProvider.future);
+                  },
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.marginMobile,
                       0,
@@ -164,180 +209,85 @@ class _EventsScreenState extends State<EventsScreen> {
                         const SizedBox(height: AppSpacing.stackLg),
                     itemBuilder: (context, i) {
                       final event = filtered[i];
-                      // Find real index in original list
-                      final originalIndex =
-                          _events.indexWhere((e) => e.id == event.id);
                       return _EventCard(
                         event: event,
-                        onRsvpTap: () => _toggleRsvp(originalIndex, event),
+                        onRsvpTap: () => _toggleRsvp(event),
                       );
                     },
                   ),
+                );
+              },
+              loading: () => const _EventsLoadingState(),
+              error: (e, _) => _EventsErrorState(
+                message: e is AppException
+                    ? e.message
+                    : 'Impossible de charger les événements.',
+                onRetry: () => ref.invalidate(eventsProvider),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showTicketDialog(BuildContext context, Event event) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
-                blurRadius: 24,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Dialog Header
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.stackMd),
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryContainer,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(AppSpacing.radiusXl),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Ticket Réservé ! 🎉',
-                      style: AppTextStyles.labelMd.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.close, color: Colors.white, size: 20),
-                    ),
-                  ],
-                ),
-              ),
-              // Ticket details
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.stackLg),
-                child: Column(
-                  children: [
-                    Text(
-                      event.title,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.headlineLgMobile.copyWith(
-                        color: AppColors.onSurface,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.stackMd),
-                    // Ticket info cards
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                        border: Border.all(color: AppColors.outlineVariant),
-                      ),
-                      child: Column(
-                        children: [
-                          _TicketRow(
-                            icon: Icons.calendar_today_outlined,
-                            label: 'Date & Heure',
-                            value: DateFormat('dd MMMM yyyy • HH:mm', 'fr_FR')
-                                .format(event.date),
-                          ),
-                          const Divider(height: 16),
-                          _TicketRow(
-                            icon: Icons.location_on_outlined,
-                            label: 'Lieu',
-                            value: event.location,
-                          ),
-                          const Divider(height: 16),
-                          const _TicketRow(
-                            icon: Icons.person_outline,
-                            label: 'Participant',
-                            value: 'Amadou Diallo',
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.stackLg),
-                    // Custom QR code painter
-                    Container(
-                      width: 140,
-                      height: 140,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 10,
-                          ),
-                        ],
-                        border: Border.all(color: AppColors.outlineVariant, width: 0.8),
-                      ),
-                      child: CustomPaint(
-                        painter: _QrCodePainter(),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'TICKET-ID: FC-${event.id.toUpperCase()}-${DateTime.now().millisecond}',
-                      style: AppTextStyles.labelSm.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                        letterSpacing: 1,
-                        fontSize: 10,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.stackLg),
-                    // Actions
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Ajouté à votre agenda de téléphone !'),
-                              backgroundColor: AppColors.primaryContainer,
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.calendar_today, size: 16),
-                        label: const Text('Ajouter au calendrier'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryContainer,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusMd),
-                          ),
-                          textStyle: AppTextStyles.labelMd
-                              .copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+}
+
+// ── Reusable widget classes (unchanged from original) ──────────────────────
+
+class _EventsLoadingState extends StatelessWidget {
+  const _EventsLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.stackLg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(strokeWidth: 2.4),
+            SizedBox(height: AppSpacing.stackMd),
+            Text(
+              'Chargement des événements...',
+              style: TextStyle(color: AppColors.onSurfaceVariant),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EventsErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _EventsErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.stackLg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(PhosphorIcons.cloudSlash,
+                size: 56, color: AppColors.outlineVariant),
+            const SizedBox(height: AppSpacing.stackMd),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyMd
+                  .copyWith(color: AppColors.onSurfaceVariant),
+            ),
+            const SizedBox(height: AppSpacing.stackMd),
+            FilledButton.tonalIcon(
+              onPressed: onRetry,
+              icon: const Icon(PhosphorIcons.arrowsClockwise, size: 18),
+              label: const Text('Réessayer'),
+            ),
+          ],
         ),
       ),
     );
@@ -353,17 +303,41 @@ class _EventCard extends StatelessWidget {
     required this.onRsvpTap,
   });
 
+  static Widget _buildImageFallback() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF012D1D), Color(0xFF003F63)],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          PhosphorIcons.calendar,
+          color: Colors.white.withValues(alpha: 0.3),
+          size: 40,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final formattedDate =
         DateFormat('EEEE dd MMMM yyyy • HH:mm', 'fr_FR').format(event.date);
 
-    return FcCard(
-      padding: EdgeInsets.zero,
-      child: Column(
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed(
+        AppRoutes.eventDetail,
+        arguments: event.id,
+      ),
+      child: FcCard(
+        padding: EdgeInsets.zero,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Event Image
+          // Event Image (cover with gradient fallback)
           ClipRRect(
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(AppSpacing.radiusLg),
@@ -373,15 +347,50 @@ class _EventCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    event.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: AppColors.surfaceContainerHigh,
-                      child: const Icon(Icons.event,
-                          color: AppColors.outline, size: 48),
+                  // Image or gradient placeholder
+                  event.imageUrl.isNotEmpty
+                      ? Image.network(
+                          event.imageUrl,
+                          fit: BoxFit.cover,
+                          cacheWidth: 800,
+                          loadingBuilder: (_, child, progress) {
+                            if (progress == null) return child;
+                            return Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                _buildImageFallback(),
+                                Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                          errorBuilder: (_, __, ___) => _buildImageFallback(),
+                        )
+                      : _buildImageFallback(),
+                  // Gradient overlay for readability
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 80,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.45),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
                     ),
                   ),
+                  // Category badge
                   Positioned(
                     top: 12,
                     left: 12,
@@ -443,7 +452,7 @@ class _EventCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.calendar_today_outlined,
+                    const Icon(PhosphorIcons.calendarBlank,
                         size: 14, color: AppColors.primaryContainer),
                     const SizedBox(width: 8),
                     Expanded(
@@ -463,7 +472,7 @@ class _EventCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.location_on_outlined,
+                    const Icon(PhosphorIcons.mapPin,
                         size: 15, color: AppColors.primaryContainer),
                     const SizedBox(width: 8),
                     Expanded(
@@ -485,7 +494,7 @@ class _EventCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.people_outline,
+                        const Icon(PhosphorIcons.users,
                             size: 16, color: AppColors.onSurfaceVariant),
                         const SizedBox(width: 4),
                         Text(
@@ -500,7 +509,7 @@ class _EventCard extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: onRsvpTap,
                       icon: Icon(
-                        event.isRsvped ? Icons.done : Icons.add,
+                        event.isRsvped ? PhosphorIcons.checkCircleFill : PhosphorIcons.plus,
                         size: 14,
                       ),
                       label: Text(event.isRsvped ? 'Inscrit' : "S'inscrire"),
@@ -529,54 +538,8 @@ class _EventCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _TicketRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _TicketRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 16, color: AppColors.primaryContainer),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTextStyles.labelSm.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: AppTextStyles.labelSm.copyWith(
-                  color: AppColors.onSurface,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -593,7 +556,7 @@ class _EmptyEventsState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
-              Icons.calendar_month_outlined,
+              PhosphorIcons.calendar,
               size: 64,
               color: AppColors.outlineVariant,
             ),
@@ -621,54 +584,4 @@ class _EmptyEventsState extends StatelessWidget {
   }
 }
 
-class _QrCodePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.primaryContainer
-      ..style = PaintingStyle.fill;
 
-    // Draw some random square shapes to look like a QR code
-    final double block = size.width / 8;
-    for (int r = 0; r < 8; r++) {
-      for (int c = 0; c < 8; c++) {
-        // Create finder patterns in corners (top-left, top-right, bottom-left)
-        bool isFinder =
-            (r < 3 && c < 3) || (r < 3 && c >= 5) || (r >= 5 && c < 3);
-        if (isFinder) {
-          // Outer square
-          if (r == 0 ||
-              r == 2 ||
-              c == 0 ||
-              c == 2 ||
-              (r == 0 && c >= 5) ||
-              (r == 2 && c >= 5) ||
-              (c == 5 && r < 3) ||
-              (c == 7 && r < 3) ||
-              (r == 5 && c < 3) ||
-              (r == 7 && c < 3) ||
-              (c == 0 && r >= 5) ||
-              (c == 2 && r >= 5)) {
-            canvas.drawRect(
-                Rect.fromLTWH(c * block, r * block, block, block), paint);
-          } else if ((r == 1 && c == 1) ||
-              (r == 1 && c == 6) ||
-              (r == 6 && c == 1)) {
-            // Inner center dot
-            canvas.drawRect(
-                Rect.fromLTWH(c * block, r * block, block, block), paint);
-          }
-        } else {
-          // Pseudo-random noise
-          if ((r + c) % 3 == 0 || (r * c) % 5 == 1) {
-            canvas.drawRect(
-                Rect.fromLTWH(c * block, r * block, block, block), paint);
-          }
-        }
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

@@ -1,73 +1,93 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, prefer_const_literals_to_create_immutables
+
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/data/models/member.dart';
+import '../../core/data/providers/data_providers.dart';
+import '../../core/errors/app_exception.dart';
+import '../../core/navigation/app_router.dart' show AppRoutes;
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/data/mock_members.dart';
+import '../../shared/widgets/app_top_bar.dart';
 import '../../shared/widgets/fc_card.dart';
 
-class WorldMapScreen extends StatefulWidget {
-  const WorldMapScreen({super.key});
+class WorldMapScreen extends ConsumerStatefulWidget {
+  WorldMapScreen({super.key});
 
   @override
-  State<WorldMapScreen> createState() => _WorldMapScreenState();
+  ConsumerState<WorldMapScreen> createState() => _WorldMapScreenState();
 }
 
-class _WorldMapScreenState extends State<WorldMapScreen> {
+class _WorldMapScreenState extends ConsumerState<WorldMapScreen> {
   int _selectedCountry = 0;
   MemberCluster? _selectedCluster;
 
-  static const _countryFilters = [
+  static final _countryFilters = [
     'Toutes régions', 'Sénégal', 'Guinée', 'France', 'Italie', 'Mali',
   ];
 
   @override
   Widget build(BuildContext context) {
+    final asyncClusters = ref.watch(memberClustersProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.95),
-        elevation: 0.5,
-        centerTitle: true,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: AppSpacing.marginMobile),
-          child: CircleAvatar(
-            radius: 20,
-            backgroundImage: NetworkImage(
-              'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=150&h=150&fit=crop&q=80',
-            ),
-          ),
-        ),
-        title: Text(
-          'Fulɓe Connect',
-          style: AppTextStyles.headlineLgMobile.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined,
-                color: AppColors.onSurfaceVariant),
-            onPressed: () {},
-            padding: const EdgeInsets.only(right: AppSpacing.marginMobile),
-          ),
-        ],
-      ),
+      appBar: const AppTopBar(showBack: true),
       body: Stack(
         children: [
           // ── World map background ──────────────────────────────
           Positioned.fill(
             child: Container(
-              color: const Color(0xFFE8EAE8),
-              child: _MapBackground(
-                clusters: _selectedCountry == 0
-                    ? MockMembers.clusters
-                    : MockMembers.clusters
-                        .where((c) =>
-                            c.country.toLowerCase() ==
-                            _countryFilters[_selectedCountry].toLowerCase())
-                        .toList(),
-                onClusterTap: (c) => setState(() => _selectedCluster = c),
+              color: Color(0xFFE8EAE8),
+              child: asyncClusters.when(
+                data: (clusters) {
+                  final filtered = _selectedCountry == 0
+                      ? clusters
+                      : clusters
+                          .where((c) =>
+                              c.country.toLowerCase() ==
+                              _countryFilters[_selectedCountry].toLowerCase())
+                          .toList();
+                  return _MapBackground(
+                    clusters: filtered,
+                    onClusterTap: (c) =>
+                        setState(() => _selectedCluster = c),
+                  );
+                },
+                loading: () => Center(
+                  child: CircularProgressIndicator(strokeWidth: 2.4),
+                ),
+                error: (e, _) => Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppSpacing.stackLg),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(PhosphorIcons.cloudSlash,
+                            size: 56, color: AppColors.outlineVariant),
+                        SizedBox(height: AppSpacing.stackMd),
+                        Text(
+                          e is AppException
+                              ? e.message
+                              : 'Impossible de charger la carte.',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.bodyMd
+                              .copyWith(color: AppColors.onSurfaceVariant),
+                        ),
+                        SizedBox(height: AppSpacing.stackMd),
+                        FilledButton.tonalIcon(
+                          onPressed: () =>
+                              ref.invalidate(memberClustersProvider),
+                          icon: Icon(PhosphorIcons.arrowsClockwise, size: 18),
+                          label: Text('Réessayer'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -93,10 +113,10 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                     ),
                     child: Row(
                       children: [
-                        const SizedBox(width: 16),
-                        const Icon(Icons.search, color: AppColors.outline),
-                        const SizedBox(width: 8),
-                        const Expanded(
+                        SizedBox(width: 16),
+                        Icon(PhosphorIcons.magnifyingGlass, color: AppColors.outline),
+                        SizedBox(width: 8),
+                        Expanded(
                           child: TextField(
                             style: AppTextStyles.bodyMd,
                             decoration: InputDecoration(
@@ -111,21 +131,21 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.all(4),
+                          margin: EdgeInsets.all(4),
                           width: 36,
                           height: 36,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.primaryContainer,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.arrow_forward,
+                          child: Icon(PhosphorIcons.arrowRight,
                               color: Colors.white, size: 18),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.stackMd),
+                SizedBox(height: AppSpacing.stackMd),
                 // Country filters
                 SizedBox(
                   height: 40,
@@ -133,15 +153,15 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                     scrollDirection: Axis.horizontal,
                     itemCount: _countryFilters.length,
                     separatorBuilder: (_, __) =>
-                        const SizedBox(width: AppSpacing.stackSm),
+                        SizedBox(width: AppSpacing.stackSm),
                     itemBuilder: (_, i) {
                       final isSelected = _selectedCountry == i;
                       return GestureDetector(
                         onTap: () =>
                             setState(() => _selectedCountry = i),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
+                          duration: Duration(milliseconds: 200),
+                          padding: EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
                             color: isSelected
@@ -197,7 +217,7 @@ class _MapBackground extends StatelessWidget {
   final List<MemberCluster> clusters;
   final ValueChanged<MemberCluster> onClusterTap;
 
-  const _MapBackground({
+  _MapBackground({
     required this.clusters,
     required this.onClusterTap,
   });
@@ -239,7 +259,7 @@ class _MapBackground extends StatelessWidget {
 class _ClusterPin extends StatefulWidget {
   final MemberCluster cluster;
   final VoidCallback onTap;
-  const _ClusterPin({required this.cluster, required this.onTap});
+  _ClusterPin({required this.cluster, required this.onTap});
 
   @override
   State<_ClusterPin> createState() => _ClusterPinState();
@@ -255,7 +275,7 @@ class _ClusterPinState extends State<_ClusterPin>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: Duration(milliseconds: 1500),
     )..repeat(reverse: true);
     _anim = Tween<double>(begin: 1.0, end: 1.4).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
@@ -317,7 +337,7 @@ class _ClusterPinState extends State<_ClusterPin>
                       BoxShadow(
                         color: _pinColor.withValues(alpha: 0.4),
                         blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
@@ -344,7 +364,7 @@ class _ClusterPinState extends State<_ClusterPin>
 class _ClusterPreviewCard extends StatelessWidget {
   final MemberCluster cluster;
   final VoidCallback onClose;
-  const _ClusterPreviewCard(
+  _ClusterPreviewCard(
       {required this.cluster, required this.onClose});
 
   @override
@@ -354,7 +374,7 @@ class _ClusterPreviewCard extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.stackMd),
+            padding: EdgeInsets.all(AppSpacing.stackMd),
             child: Row(
               children: [
                 Container(
@@ -365,10 +385,10 @@ class _ClusterPreviewCard extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusMd),
                   ),
-                  child: const Icon(Icons.groups,
+                  child: Icon(PhosphorIcons.users,
                       color: AppColors.primaryContainer),
                 ),
-                const SizedBox(width: AppSpacing.stackMd),
+                SizedBox(width: AppSpacing.stackMd),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,7 +411,7 @@ class _ClusterPreviewCard extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: onClose,
-                  icon: const Icon(Icons.close,
+                  icon: Icon(PhosphorIcons.x,
                       color: AppColors.onSurfaceVariant, size: 20),
                 ),
               ],
@@ -399,12 +419,15 @@ class _ClusterPreviewCard extends StatelessWidget {
           ),
           Divider(height: 0, color: AppColors.outlineVariant.withValues(alpha: 0.5)),
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.stackMd),
+            padding: EdgeInsets.all(AppSpacing.stackMd),
             child: Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      onClose();
+                      Navigator.of(context).pushNamed(AppRoutes.directory);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryContainer,
                       foregroundColor: Colors.white,
@@ -414,23 +437,23 @@ class _ClusterPreviewCard extends StatelessWidget {
                             BorderRadius.circular(AppSpacing.radiusMd),
                       ),
                     ),
-                    child: const Text('Voir les profils'),
+                    child: Text('Voir les profils'),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.stackSm),
+                SizedBox(width: AppSpacing.stackSm),
                 OutlinedButton(
                   onPressed: () {},
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
+                    side: BorderSide(
                         color: AppColors.outlineVariant),
                     shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),
                     ),
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                   ),
-                  child: const Icon(Icons.chat_outlined,
+                  child: Icon(PhosphorIcons.chatCircle,
                       color: AppColors.onSurfaceVariant, size: 20),
                 ),
               ],
@@ -446,14 +469,14 @@ class _ClusterPreviewCard extends StatelessWidget {
 class _MapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final bgPaint = Paint()..color = const Color(0xFFDDE2DE);
+    final bgPaint = Paint()..color = Color(0xFFDDE2DE);
     canvas.drawRect(Offset.zero & size, bgPaint);
 
     final landPaint = Paint()
-      ..color = const Color(0xFFCDD4CE)
+      ..color = Color(0xFFCDD4CE)
       ..style = PaintingStyle.fill;
     final borderPaint = Paint()
-      ..color = const Color(0xFFB8C2BA)
+      ..color = Color(0xFFB8C2BA)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
 
@@ -480,7 +503,7 @@ class _MapPainter extends CustomPainter {
           width: size.width * 0.14,
           height: size.height * 0.28,
         ),
-        const Radius.circular(20),
+        Radius.circular(20),
       ));
     canvas.drawPath(africa, fill);
     canvas.drawPath(africa, border);
@@ -493,7 +516,7 @@ class _MapPainter extends CustomPainter {
           width: size.width * 0.14,
           height: size.height * 0.4,
         ),
-        const Radius.circular(16),
+        Radius.circular(16),
       ));
     canvas.drawPath(americas, fill);
     canvas.drawPath(americas, border);
@@ -506,7 +529,7 @@ class _MapPainter extends CustomPainter {
           width: size.width * 0.22,
           height: size.height * 0.22,
         ),
-        const Radius.circular(12),
+        Radius.circular(12),
       ));
     canvas.drawPath(asia, fill);
     canvas.drawPath(asia, border);

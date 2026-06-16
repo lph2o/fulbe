@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+// On masque `AuthException` de gotrue car on utilise notre propre hiérarchie
+// d'exceptions (voir `core/errors/app_exception.dart`), exposée via AuthService.
+
+import '../../core/auth/auth_service.dart';
+import '../../core/data/countries.dart';
+import '../../core/errors/app_exception.dart';
+import '../../core/services/location_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -21,14 +28,20 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _countryController = TextEditingController();
-  final _otpController = TextEditingController();
+
+  // Localisation (pays + ville en cascade)
+  String? _selectedCountry;
+  String? _selectedCity;
+
+  // Localisation GPS
+  final _locationService = const LocationService();
+  bool _isLocating = false;
+  String? _locationHint;
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
-  bool _showOtpVerification = false;
+  bool _showEmailConfirmation = false;
   String? _errorMessage;
 
   @override
@@ -58,9 +71,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     _passwordController.dispose();
     _nameController.dispose();
     _confirmPasswordController.dispose();
-    _cityController.dispose();
-    _countryController.dispose();
-    _otpController.dispose();
+
     super.dispose();
   }
 
@@ -73,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     });
 
     try {
-      await Supabase.instance.client.auth.signInWithPassword(
+      await auth.signInWithPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
@@ -81,19 +92,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         // Pop back to AuthGate, which will trigger navigation to MainShell
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
-    } on AuthException catch (e) {
-      setState(() {
-        _errorMessage = _getLocalizedError(e.message);
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Une erreur inattendue est survenue. Veuillez réessayer.';
-      });
+    } on AppException catch (e) {
+      setState(() => _errorMessage = e.message);
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -107,112 +110,43 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     });
 
     try {
-      final response = await Supabase.instance.client.auth.signUp(
+      final response = await auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        data: {
-          'full_name': _nameController.text.trim(),
-          'city': _cityController.text.trim(),
-          'country': _countryController.text.trim(),
-        },
+        fullName: _nameController.text.trim(),
+        city: _selectedCity ?? '',
+        country: _selectedCountry ?? '',
       );
 
-      if (mounted) {
-        if (response.session != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Inscription réussie ! Connexion automatique...'),
-              backgroundColor: AppColors.primaryContainer,
-            ),
-          );
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Un code de confirmation a été envoyé à votre adresse email.'),
-              backgroundColor: AppColors.primaryContainer,
-          ),
-        );
-        setState(() {
-          _showOtpVerification = true;
-        });
-      }
-      }
-    } on AuthException catch (e) {
-      setState(() {
-        _errorMessage = _getLocalizedError(e.message);
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Une erreur inattendue est survenue. Veuillez réessayer.';
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
+      if (!mounted) return;
 
-  Future<void> _submitOtp() async {
-    if (_otpController.text.trim().isEmpty) {
-      setState(() {
-        _errorMessage = 'Veuillez saisir le code de confirmation.';
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await Supabase.instance.client.auth.verifyOTP(
-        email: _emailController.text.trim(),
-        token: _otpController.text.trim(),
-        type: OtpType.signup,
-      );
-
-      if (mounted) {
+      if (response.session != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Compte confirmé avec succès !'),
+            content: Text('Inscription réussie ! Connexion automatique...'),
             backgroundColor: AppColors.primaryContainer,
           ),
         );
         Navigator.of(context).popUntil((route) => route.isFirst);
+      } else {
+        setState(() => _showEmailConfirmation = true);
       }
-    } on AuthException catch (e) {
-      setState(() {
-        _errorMessage = _getLocalizedError(e.message);
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Une erreur inattendue est survenue lors de la validation du code.';
-      });
+    } on AppException catch (e) {
+      setState(() => _errorMessage = e.message);
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
 
-  String _getLocalizedError(String message) {
-    final lower = message.toLowerCase();
-    if (lower.contains('invalid login credentials')) {
-      return 'Identifiants de connexion invalides. Veuillez vérifier votre email et mot de passe.';
-    } else if (lower.contains('email already registered') || lower.contains('user already exists')) {
-      return 'Cet email est déjà enregistré. Connectez-vous à la place !';
-    } else if (lower.contains('password should be at least')) {
-      return 'Le mot de passe doit contenir au moins 6 caractères.';
-    } else if (lower.contains('network') || lower.contains('connection failed')) {
-      return 'Erreur réseau. Veuillez vérifier votre connexion internet.';
-    }
-    return message;
+  /// Ramène l'utilisateur à l'écran de connexion après avoir cliqué
+  /// sur le lien de confirmation dans son email.
+  void _goToLogin() {
+    setState(() {
+      _showEmailConfirmation = false;
+      _tabController.index = 0;
+    });
   }
 
   @override
@@ -223,7 +157,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.onPrimary),
+          icon: const Icon(PhosphorIcons.arrowLeft, color: AppColors.onPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -254,7 +188,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         ),
                       ),
                       child: const Icon(
-                        Icons.public,
+                        PhosphorIcons.globe,
                         size: 32,
                         color: AppColors.secondaryContainer,
                       ),
@@ -270,7 +204,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     const SizedBox(height: AppSpacing.stackLg),
 
                     // Custom glassmorphic tab selector
-                    if (!_showOtpVerification) ...[
+                    if (!_showEmailConfirmation) ...[
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -312,7 +246,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.error_outline, color: AppColors.onErrorContainer),
+                            const Icon(PhosphorIcons.warningCircle, color: AppColors.onErrorContainer),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -333,8 +267,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       transitionBuilder: (Widget child, Animation<double> animation) {
                         return FadeTransition(opacity: animation, child: child);
                       },
-                      child: _showOtpVerification
-                          ? _buildOtpForm()
+                      child: _showEmailConfirmation
+                          ? _buildEmailConfirmationScreen()
                           : (_tabController.index == 0
                               ? _buildLoginForm()
                               : _buildRegisterForm()),
@@ -359,7 +293,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             controller: _emailController,
             label: 'Adresse email',
             hint: 'exemple@domaine.com',
-            icon: Icons.email_outlined,
+            icon: PhosphorIcons.envelope,
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
               if (value == null || value.isEmpty) return 'Veuillez saisir votre email';
@@ -374,11 +308,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             controller: _passwordController,
             label: 'Mot de passe',
             hint: '••••••••',
-            icon: Icons.lock_outline,
+            icon: PhosphorIcons.lockSimple,
             obscureText: _obscurePassword,
             suffixIcon: IconButton(
               icon: Icon(
-                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                _obscurePassword ? PhosphorIcons.eyeSlash : PhosphorIcons.eye,
                 color: AppColors.primaryFixedDim,
               ),
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -438,40 +372,24 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             controller: _nameController,
             label: 'Nom complet',
             hint: 'Aaliyah Sow',
-            icon: Icons.person_outline,
+            icon: PhosphorIcons.user,
             validator: (value) {
               if (value == null || value.isEmpty) return 'Veuillez saisir votre nom';
               return null;
             },
           ),
           const SizedBox(height: AppSpacing.stackSm),
-          _buildTextField(
-            controller: _countryController,
-            label: 'Pays de résidence',
-            hint: 'Sénégal',
-            icon: Icons.public,
-            validator: (value) {
-              if (value == null || value.isEmpty) return 'Veuillez saisir votre pays de résidence';
-              return null;
-            },
-          ),
+          _buildCountryDropdown(),
           const SizedBox(height: AppSpacing.stackSm),
-          _buildTextField(
-            controller: _cityController,
-            label: 'Ville de résidence',
-            hint: 'Dakar',
-            icon: Icons.location_city,
-            validator: (value) {
-              if (value == null || value.isEmpty) return 'Veuillez saisir votre ville de résidence';
-              return null;
-            },
-          ),
+          _buildLocationButton(),
+          const SizedBox(height: AppSpacing.stackSm),
+          _buildCityDropdown(),
           const SizedBox(height: AppSpacing.stackSm),
           _buildTextField(
             controller: _emailController,
             label: 'Adresse email',
             hint: 'exemple@domaine.com',
-            icon: Icons.email_outlined,
+            icon: PhosphorIcons.envelope,
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
               if (value == null || value.isEmpty) return 'Veuillez saisir votre email';
@@ -486,11 +404,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             controller: _passwordController,
             label: 'Mot de passe',
             hint: '••••••••',
-            icon: Icons.lock_outline,
+            icon: PhosphorIcons.lockSimple,
             obscureText: _obscurePassword,
             suffixIcon: IconButton(
               icon: Icon(
-                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                _obscurePassword ? PhosphorIcons.eyeSlash : PhosphorIcons.eye,
                 color: AppColors.primaryFixedDim,
               ),
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -506,11 +424,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             controller: _confirmPasswordController,
             label: 'Confirmer le mot de passe',
             hint: '••••••••',
-            icon: Icons.lock_clock_outlined,
+            icon: PhosphorIcons.lockSimple,
             obscureText: _obscureConfirmPassword,
             suffixIcon: IconButton(
               icon: Icon(
-                _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                _obscureConfirmPassword ? PhosphorIcons.eyeSlash : PhosphorIcons.eye,
                 color: AppColors.primaryFixedDim,
               ),
               onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
@@ -562,46 +480,82 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildOtpForm() {
+  /// Écran affiché après inscription : invite l'utilisateur à vérifier
+  /// sa boîte email et cliquer sur le lien de confirmation envoyé par Supabase.
+  Widget _buildEmailConfirmationScreen() {
+    final email = _emailController.text.trim();
     return Column(
-      key: const ValueKey('otp_form'),
-      crossAxisAlignment: CrossAxisAlignment.start,
+      key: const ValueKey('email_confirmation'),
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        const SizedBox(height: AppSpacing.stackLg),
+        // Icône email
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.secondaryContainer.withValues(alpha: 0.15),
+            border: Border.all(
+              color: AppColors.secondaryContainer.withValues(alpha: 0.4),
+              width: 2,
+            ),
+          ),
+          child: const Icon(
+            PhosphorIcons.envelope,
+            size: 40,
+            color: AppColors.secondaryContainer,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.stackMd),
         Text(
-          'Vérification de l\'adresse email',
+          'Vérifiez votre email',
           style: AppTextStyles.labelMd.copyWith(
             color: AppColors.onPrimary,
             fontWeight: FontWeight.w700,
-            fontSize: 18,
+            fontSize: 20,
           ),
         ),
         const SizedBox(height: AppSpacing.stackSm),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            'Nous avons envoyé un lien de confirmation à',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMd.copyWith(
+              color: AppColors.primaryFixedDim,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
         Text(
-          'Nous avons envoyé un code de confirmation à 6 chiffres à ${_emailController.text.trim()}. Veuillez le saisir ci-dessous.',
+          email,
+          textAlign: TextAlign.center,
           style: AppTextStyles.bodyMd.copyWith(
-            color: AppColors.primaryFixedDim,
+            color: AppColors.secondaryContainer,
+            fontWeight: FontWeight.w700,
             fontSize: 14,
           ),
         ),
-        const SizedBox(height: AppSpacing.stackLg),
-        _buildTextField(
-          controller: _otpController,
-          label: 'Code de confirmation',
-          hint: '123456',
-          icon: Icons.pin_outlined,
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value == null || value.isEmpty) return 'Veuillez saisir le code';
-            if (value.length < 6) return 'Le code doit contenir 6 chiffres';
-            return null;
-          },
+        const SizedBox(height: AppSpacing.stackSm),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            'Cliquez sur le lien contenu dans l\'email pour activer votre compte, puis connectez-vous.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMd.copyWith(
+              color: AppColors.primaryFixedDim,
+              fontSize: 14,
+            ),
+          ),
         ),
         const SizedBox(height: AppSpacing.stackLg),
         SizedBox(
           width: double.infinity,
           height: 56,
           child: ElevatedButton(
-            onPressed: _isLoading ? null : _submitOtp,
+            onPressed: _goToLogin,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondaryContainer,
               foregroundColor: AppColors.onSecondaryContainer,
@@ -609,25 +563,15 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
               ),
-              disabledBackgroundColor: AppColors.secondaryContainer.withValues(alpha: 0.5),
             ),
-            child: _isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.onSecondaryContainer),
-                    ),
-                  )
-                : Text(
-                    'Confirmer l\'inscription',
-                    style: AppTextStyles.labelMd.copyWith(
-                      color: AppColors.onSecondaryContainer,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
+            child: Text(
+              'Se connecter',
+              style: AppTextStyles.labelMd.copyWith(
+                color: AppColors.onSecondaryContainer,
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.stackMd),
@@ -635,14 +579,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           width: double.infinity,
           height: 56,
           child: OutlinedButton(
-            onPressed: _isLoading
-                ? null
-                : () {
-                    setState(() {
-                      _showOtpVerification = false;
-                      _otpController.clear();
-                    });
-                  },
+            onPressed: () {
+              setState(() {
+                _showEmailConfirmation = false;
+              });
+            },
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
               foregroundColor: AppColors.onPrimary,
@@ -723,6 +664,294 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             errorStyle: AppTextStyles.labelSm.copyWith(color: Colors.redAccent, fontWeight: FontWeight.w500),
           ),
         ),
+      ],
+    );
+  }
+
+  /// Wrapper commun pour les [DropdownButtonFormField] (pays, ville, ...).
+  ///
+  /// Réutilise le style glassmorphique de [_buildTextField] (fond sombre,
+  /// bordures blanches subtiles, focus doré via [AppColors.secondaryContainer]).
+  Widget _buildDropdown({
+    required String label,
+    required String hint,
+    required IconData icon,
+    required List<String> items,
+    required String? value,
+    required ValueChanged<String?>? onChanged,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.labelSm.copyWith(
+            color: AppColors.primaryFixedDim,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(
+          initialValue: value,
+          isExpanded: true,
+          onChanged: _isLoading ? null : onChanged,
+          validator: validator,
+          iconEnabledColor: AppColors.primaryFixedDim,
+          iconDisabledColor: AppColors.primaryFixedDim.withValues(alpha: 0.4),
+          dropdownColor: AppColors.primary,
+          style: AppTextStyles.bodyMd.copyWith(color: AppColors.onPrimary),
+          selectedItemBuilder: (context) => items
+              .map((s) => Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      s,
+                      style: AppTextStyles.bodyMd
+                          .copyWith(color: AppColors.onPrimary),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ))
+              .toList(),
+          decoration: InputDecoration(
+            hintText: items.isEmpty ? hint : hint,
+            hintStyle: AppTextStyles.bodyMd.copyWith(
+              color: AppColors.primaryFixedDim.withValues(alpha: 0.5),
+            ),
+            prefixIcon: Icon(icon, color: AppColors.primaryFixedDim, size: 20),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide:
+                  BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide:
+                  BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(
+                  color: AppColors.secondaryContainer, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(color: AppColors.error, width: 2),
+            ),
+            errorStyle: AppTextStyles.labelSm.copyWith(
+                color: Colors.redAccent, fontWeight: FontWeight.w500),
+          ),
+          items: items
+              .map((s) => DropdownMenuItem<String>(
+                    value: s,
+                    child: Text(
+                      s,
+                      style: AppTextStyles.bodyMd
+                          .copyWith(color: AppColors.onPrimary),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  /// Dropdown du pays — basé sur [Countries.names].
+  Widget _buildCountryDropdown() {
+    return _buildDropdown(
+      label: 'Pays de résidence',
+      hint: 'Sélectionnez votre pays',
+      icon: PhosphorIcons.globe,
+      items: Countries.names,
+      value: _selectedCountry,
+      onChanged: (newCountry) {
+        setState(() {
+          _selectedCountry = newCountry;
+          // Reset ville si elle n'appartient plus au nouveau pays
+          if (_selectedCity != null &&
+              !Countries.citiesFor(newCountry ?? '')
+                  .contains(_selectedCity)) {
+            _selectedCity = null;
+          }
+        });
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Veuillez sélectionner votre pays de résidence';
+        }
+        return null;
+      },
+    );
+  }
+
+  /// Dropdown de la ville — filtré par le pays sélectionné.
+  ///
+  /// **Palier 1 (fix bug)** : si aucun pays n'est sélectionné, on rend un
+  /// [TextFormField] désactivé (lecture seule) plutôt qu'un
+  /// [DropdownButtonFormField] avec `items: []` + `value: null` qui lève une
+  /// exception runtime silencieuse.
+  Widget _buildCityDropdown() {
+    if (_selectedCountry == null) {
+      // Pas de pays → on rend un TextFormField désactivé qui sert de placeholder.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ville de résidence',
+            style: AppTextStyles.labelSm.copyWith(
+              color: AppColors.primaryFixedDim,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            enabled: false,
+            style: AppTextStyles.bodyMd.copyWith(
+              color: AppColors.primaryFixedDim.withValues(alpha: 0.5),
+            ),
+            decoration: InputDecoration(
+              hintText: "Sélectionnez d'abord un pays",
+              hintStyle: AppTextStyles.bodyMd.copyWith(
+                color: AppColors.primaryFixedDim.withValues(alpha: 0.5),
+              ),
+              prefixIcon: const Icon(PhosphorIcons.buildings,
+                  color: AppColors.primaryFixedDim, size: 20),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.04),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.10)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.10)),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    final cities = Countries.citiesFor(_selectedCountry!);
+    return _buildDropdown(
+      label: 'Ville de résidence',
+      hint: cities.isEmpty
+          ? 'Aucune ville connue pour ce pays (saisie libre plus tard)'
+          : 'Sélectionnez votre ville',
+      icon: PhosphorIcons.buildings,
+      items: cities,
+      value: _selectedCity,
+      onChanged: cities.isEmpty
+          ? null
+          : (newCity) => setState(() => _selectedCity = newCity),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Veuillez sélectionner votre ville de résidence';
+        }
+        return null;
+      },
+    );
+  }
+
+  /// Bouton **📍 Utiliser ma position actuelle** — demande la permission GPS,
+  /// récupère la position, fait un reverse-geocoding, et peuple les dropdowns.
+  Future<void> _useCurrentLocation() async {
+    setState(() {
+      _isLocating = true;
+      _locationHint = null;
+    });
+
+    try {
+      final result = await _locationService.resolveCurrent();
+      if (result == null || !mounted) return;
+
+      setState(() {
+        _selectedCountry = result.country;
+        // Si la ville détectée est dans la liste, on la sélectionne ;
+        // sinon on la stocke dans _locationHint pour affichage ultérieur.
+        final knownCities = Countries.citiesFor(result.country);
+        if (knownCities.contains(result.city)) {
+          _selectedCity = result.city;
+          _locationHint = null;
+        } else {
+          _selectedCity = null;
+          _locationHint = result.city.isNotEmpty
+              ? '📍 ${result.city} détecté (hors liste, non sélectionnable)'
+              : '📍 Pays détecté : ${result.country} (ville non trouvée)';
+        }
+      });
+    } on AppException catch (e) {
+      if (!mounted) return;
+      setState(() => _locationHint = '⚠️ ${e.message}');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _locationHint =
+          '⚠️ Erreur inattendue lors de la géolocalisation.');
+    } finally {
+      if (mounted) {
+        setState(() => _isLocating = false);
+      }
+    }
+  }
+
+  /// Bouton GPS + hint contextuel.
+  Widget _buildLocationButton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        OutlinedButton.icon(
+          onPressed: (_isLoading || _isLocating) ? null : _useCurrentLocation,
+          icon: _isLocating
+              ? const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.secondaryContainer),
+                  ),
+                )
+              : const Icon(PhosphorIcons.crosshair, size: 16),
+          label: Text(
+            _isLocating
+                ? 'Localisation en cours…'
+                : 'Utiliser ma position actuelle',
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.secondaryContainer,
+            side: BorderSide(
+              color: AppColors.secondaryContainer.withValues(alpha: 0.5),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+            textStyle: AppTextStyles.labelSm
+                .copyWith(fontWeight: FontWeight.w600),
+          ),
+        ),
+        if (_locationHint != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            _locationHint!,
+            style: AppTextStyles.labelSm.copyWith(
+              color: AppColors.primaryFixedDim,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
       ],
     );
   }

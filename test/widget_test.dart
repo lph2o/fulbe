@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,7 +24,11 @@ void main() {
   });
 
   testWidgets('App launches and shows welcome screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const FulbeConnectApp());
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: FulbeConnectApp(hasValidConfig: true),
+      ),
+    );
     // Verify the app starts without crash
     expect(find.byType(MaterialApp), findsOneWidget);
   });
@@ -33,10 +38,13 @@ void main() {
       debugNetworkImageHttpClientProvider = () => MockHttpClient();
 
       await tester.pumpWidget(
-        const MaterialApp(
-          home: EventsScreen(),
+        const ProviderScope(
+          child: MaterialApp(
+            home: EventsScreen(),
+          ),
         ),
       );
+      await tester.pump();
       expect(find.text('Événements'), findsOneWidget);
     } finally {
       debugNetworkImageHttpClientProvider = null;

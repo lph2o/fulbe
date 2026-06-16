@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
@@ -37,7 +38,7 @@ class FcSearchBar extends StatelessWidget {
                 hintStyle: AppTextStyles.bodyMd
                     .copyWith(color: AppColors.outline),
                 prefixIcon: const Icon(
-                  Icons.search,
+                  PhosphorIcons.magnifyingGlass,
                   color: AppColors.outline,
                   size: AppSpacing.iconMd,
                 ),
@@ -78,7 +79,7 @@ class _FilterButton extends StatelessWidget {
               color: AppColors.outlineVariant, width: 0.8),
         ),
         child: const Icon(
-          Icons.tune,
+          PhosphorIcons.faders,
           color: AppColors.onSurfaceVariant,
           size: AppSpacing.iconMd,
         ),

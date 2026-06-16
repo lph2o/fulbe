@@ -1,118 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../core/data/models/conversation.dart';
+import '../../core/data/providers/data_providers.dart';
+import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
+import 'conversation_detail_screen.dart';
 
-class _Conversation {
-  final String id;
-  final String name;
-  final String? avatarUrl;
-  final String lastMessage;
-  final String time;
-  final int unread;
-  final bool isRead;
-
-  const _Conversation({
-    required this.id,
-    required this.name,
-    this.avatarUrl,
-    required this.lastMessage,
-    required this.time,
-    this.unread = 0,
-    this.isRead = true,
-  });
-}
-
-class MessagesScreen extends StatefulWidget {
+class MessagesScreen extends ConsumerStatefulWidget {
   const MessagesScreen({super.key});
 
   @override
-  State<MessagesScreen> createState() => _MessagesScreenState();
+  ConsumerState<MessagesScreen> createState() => _MessagesScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen>
+class _MessagesScreenState extends ConsumerState<MessagesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _searchCtrl = TextEditingController();
-
-  static const _directConversations = [
-    _Conversation(
-      id: 'c1',
-      name: 'Amadou Diallo',
-      avatarUrl:
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&q=80',
-      lastMessage: 'Super ! Je te rappelle dès que possible pour discuter du projet.',
-      time: '14:32',
-      unread: 3,
-      isRead: false,
-    ),
-    _Conversation(
-      id: 'c2',
-      name: 'Dr. Aïssatou Sow',
-      avatarUrl:
-          'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&q=80',
-      lastMessage: 'Merci pour les documents, je les ai bien reçus.',
-      time: '11:18',
-      unread: 0,
-      isRead: true,
-    ),
-    _Conversation(
-      id: 'c3',
-      name: 'Ousmane Baldé',
-      avatarUrl:
-          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&q=80',
-      lastMessage: 'On se voit à l\'événement de Paris la semaine prochaine ?',
-      time: 'Hier',
-      unread: 0,
-      isRead: true,
-    ),
-    _Conversation(
-      id: 'c4',
-      name: 'Fatou Barry',
-      avatarUrl:
-          'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=150&h=150&fit=crop&q=80',
-      lastMessage: 'J\'ai partagé le lien de l\'événement avec l\'équipe.',
-      time: 'Lun',
-      unread: 0,
-      isRead: true,
-    ),
-  ];
-
-  static const _groupConversations = [
-    _Conversation(
-      id: 'g1',
-      name: '🇸🇳 Peuls au Sénégal',
-      lastMessage: 'Ibrahima: Nouvelle annonce pour les membres de Dakar !',
-      time: '09:15',
-      unread: 12,
-      isRead: false,
-    ),
-    _Conversation(
-      id: 'g2',
-      name: '💼 Network Entrepreneurs',
-      lastMessage: 'Mamadou: Qui participe au forum de la semaine prochaine ?',
-      time: 'Hier',
-      unread: 4,
-      isRead: false,
-    ),
-    _Conversation(
-      id: 'g3',
-      name: '📚 Club de Lecture Pulaar',
-      lastMessage: 'Admin: Le livre du mois de juillet a été annoncé !',
-      time: 'Dim',
-      unread: 0,
-      isRead: true,
-    ),
-  ];
+  RealtimeChannel? _msgChannel;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _subscribeToNewMessages();
+  }
+
+  void _subscribeToNewMessages() {
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) return;
+
+    _msgChannel = Supabase.instance.client
+        .channel('conversations_list')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'messages',
+          callback: (_) {
+            if (mounted) ref.invalidate(conversationsProvider);
+          },
+        )
+        .subscribe();
   }
 
   @override
   void dispose() {
+    _msgChannel?.unsubscribe();
     _tabController.dispose();
     _searchCtrl.dispose();
     super.dispose();
@@ -120,23 +58,29 @@ class _MessagesScreenState extends State<MessagesScreen>
 
   @override
   Widget build(BuildContext context) {
+    final asyncConversations = ref.watch(conversationsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.surface.withValues(alpha: 0.95),
         elevation: 0.5,
         titleSpacing: AppSpacing.marginMobile,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+            icon: const Icon(PhosphorIcons.arrowLeft,
+                color: AppColors.onSurfaceVariant, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         title: Text('Messages',
             style: AppTextStyles.headlineLg
                 .copyWith(color: AppColors.onSurface, fontSize: 28)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: AppColors.onSurfaceVariant),
+            icon: const Icon(PhosphorIcons.magnifyingGlass, color: AppColors.onSurfaceVariant),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.more_vert,
+            icon: const Icon(PhosphorIcons.dotsThree,
                 color: AppColors.onSurfaceVariant),
             onPressed: () {},
             padding: const EdgeInsets.only(right: AppSpacing.marginMobile),
@@ -166,7 +110,7 @@ class _MessagesScreenState extends State<MessagesScreen>
         backgroundColor: AppColors.primaryContainer,
         foregroundColor: Colors.white,
         elevation: 3,
-        child: const Icon(Icons.edit_outlined),
+        child: const Icon(PhosphorIcons.pencilSimple),
       ),
       body: Column(
         children: [
@@ -185,7 +129,7 @@ class _MessagesScreenState extends State<MessagesScreen>
                   hintText: 'Rechercher un message...',
                   hintStyle: TextStyle(color: AppColors.outline),
                   prefixIcon:
-                      Icon(Icons.search, color: AppColors.outline, size: 20),
+                      Icon(PhosphorIcons.magnifyingGlass, color: AppColors.outline, size: 20),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
@@ -196,46 +140,76 @@ class _MessagesScreenState extends State<MessagesScreen>
               ),
             ),
           ),
-          // Tab content
+          // Tab content with Riverpod
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Direct Messages
-                _directConversations.isEmpty
-                    ? _EmptyMessagesState()
-                    : ListView.separated(
-                        padding: const EdgeInsets.only(
-                            bottom: AppSpacing.bottomNavHeight + 80),
-                        itemCount: _directConversations.length,
-                        separatorBuilder: (_, __) => Divider(
-                          height: 0,
-                          indent: 80,
-                          color: AppColors.outlineVariant.withValues(alpha: 0.5),
-                        ),
-                        itemBuilder: (_, i) => _ConversationTile(
-                          conversation: _directConversations[i],
-                          isGroup: false,
-                        ),
-                      ),
-                // Groups
-                _groupConversations.isEmpty
-                    ? _EmptyMessagesState()
-                    : ListView.separated(
-                        padding: const EdgeInsets.only(
-                            bottom: AppSpacing.bottomNavHeight + 80),
-                        itemCount: _groupConversations.length,
-                        separatorBuilder: (_, __) => Divider(
-                          height: 0,
-                          indent: 80,
-                          color: AppColors.outlineVariant.withValues(alpha: 0.5),
-                        ),
-                        itemBuilder: (_, i) => _ConversationTile(
-                          conversation: _groupConversations[i],
-                          isGroup: true,
-                        ),
-                      ),
-              ],
+            child: asyncConversations.when(
+              data: (conversations) {
+                final direct = conversations
+                    .where((c) => !c.isGroup)
+                    .toList(growable: false);
+                final groups = conversations
+                    .where((c) => c.isGroup)
+                    .toList(growable: false);
+
+                return TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Direct Messages
+                    direct.isEmpty
+                        ? const _EmptyMessagesState()
+                        : ListView.separated(
+                            padding: const EdgeInsets.only(
+                                bottom: AppSpacing.bottomNavHeight + 80),
+                            itemCount: direct.length,
+                            separatorBuilder: (_, __) => Divider(
+                              height: 0,
+                              indent: 80,
+                              color: AppColors.outlineVariant
+                                  .withValues(alpha: 0.5),
+                            ),
+                            itemBuilder: (_, i) => _ConversationTile(
+                              conversation: direct[i],
+                            ),
+                          ),
+                    // Groups
+                    groups.isEmpty
+                        ? const _EmptyMessagesState()
+                        : ListView.separated(
+                            padding: const EdgeInsets.only(
+                                bottom: AppSpacing.bottomNavHeight + 80),
+                            itemCount: groups.length,
+                            separatorBuilder: (_, __) => Divider(
+                              height: 0,
+                              indent: 80,
+                              color: AppColors.outlineVariant
+                                  .withValues(alpha: 0.5),
+                            ),
+                            itemBuilder: (_, i) => _ConversationTile(
+                              conversation: groups[i],
+                            ),
+                          ),
+                  ],
+                );
+              },
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.stackLg),
+                  child: CircularProgressIndicator(strokeWidth: 2.4),
+                ),
+              ),
+              error: (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.stackLg),
+                  child: Text(
+                    e is AppException
+                        ? e.message
+                        : 'Impossible de charger les messages.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodyMd
+                        .copyWith(color: AppColors.onSurfaceVariant),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -245,15 +219,42 @@ class _MessagesScreenState extends State<MessagesScreen>
 }
 
 class _ConversationTile extends StatelessWidget {
-  final _Conversation conversation;
-  final bool isGroup;
-  const _ConversationTile(
-      {required this.conversation, required this.isGroup});
+  final Conversation conversation;
+  const _ConversationTile({required this.conversation});
+
+  Widget _buildActiveCallBadge() {
+    final icon = conversation.isGroupCall
+        ? PhosphorIcons.users
+        : PhosphorIcons.phone;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: AppColors.primary),
+        const SizedBox(width: 4),
+        Text(
+          'Appel en cours',
+          style: AppTextStyles.labelSm.copyWith(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w700,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ConversationDetailScreen(
+              conversationId: conversation.id,
+            ),
+          ),
+        );
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.marginMobile, vertical: 12),
@@ -262,7 +263,7 @@ class _ConversationTile extends StatelessWidget {
             // Avatar
             Stack(
               children: [
-                isGroup || conversation.avatarUrl == null
+                conversation.isGroup || conversation.avatarUrl == null
                     ? Container(
                         width: 52,
                         height: 52,
@@ -286,8 +287,8 @@ class _ConversationTile extends StatelessWidget {
                         backgroundImage:
                             NetworkImage(conversation.avatarUrl!),
                       ),
-                // Online indicator
-                if (!isGroup)
+                // Online indicator (direct only)
+                if (!conversation.isGroup)
                   Positioned(
                     bottom: 1,
                     right: 1,
@@ -339,28 +340,32 @@ class _ConversationTile extends StatelessWidget {
                   Row(
                     children: [
                       // Read receipt
-                      if (conversation.isRead && conversation.unread == 0)
+                      if (conversation.isRead &&
+                          conversation.unread == 0 &&
+                          !conversation.isCallActive)
                         const Padding(
                           padding: EdgeInsets.only(right: 4),
-                          child: Icon(Icons.done_all,
+                          child: Icon(PhosphorIcons.checks,
                               size: 14,
                               color: AppColors.primaryContainer),
                         ),
                       Expanded(
-                        child: Text(
-                          conversation.lastMessage,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodyMd.copyWith(
-                            color: conversation.unread > 0
-                                ? AppColors.onSurface
-                                : AppColors.onSurfaceVariant,
-                            fontWeight: conversation.unread > 0
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                            fontSize: 13,
-                          ),
-                        ),
+                        child: conversation.isCallActive
+                            ? _buildActiveCallBadge()
+                            : Text(
+                                conversation.lastMessage,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.bodyMd.copyWith(
+                                  color: conversation.unread > 0
+                                      ? AppColors.onSurface
+                                      : AppColors.onSurfaceVariant,
+                                  fontWeight: conversation.unread > 0
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  fontSize: 13,
+                                ),
+                              ),
                       ),
                       if (conversation.unread > 0)
                         Container(
@@ -395,13 +400,15 @@ class _ConversationTile extends StatelessWidget {
 }
 
 class _EmptyMessagesState extends StatelessWidget {
+  const _EmptyMessagesState();
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.chat_bubble_outline,
+          const Icon(PhosphorIcons.chatCircle,
               size: 64, color: AppColors.outlineVariant),
           const SizedBox(height: AppSpacing.stackMd),
           Text('Aucun message pour l\'instant.',
@@ -410,7 +417,7 @@ class _EmptyMessagesState extends StatelessWidget {
           const SizedBox(height: AppSpacing.stackMd),
           ElevatedButton.icon(
             onPressed: () {},
-            icon: const Icon(Icons.edit_outlined, size: 16),
+            icon: const Icon(PhosphorIcons.pencilSimple, size: 16),
             label: const Text('Nouvelle conversation'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryContainer,

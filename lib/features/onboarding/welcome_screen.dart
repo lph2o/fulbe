@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -272,7 +273,7 @@ class _LogoOrb extends StatelessWidget {
                   ],
                 ),
                 child: const Icon(
-                  Icons.public,
+                  PhosphorIcons.globe,
                   size: 48,
                   color: AppColors.secondaryContainer,
                 ),

@@ -23,6 +23,13 @@ migrate_working_dir/
 # is commented out by default.
 #.vscode/
 
+# Track the example launch configuration but ignore personal/IDE state files.
+# Result: `.vscode/launch.json` (committed), `.vscode/launch.json.example` (committed),
+#         everything else under `.vscode/` ignored.
+!.vscode/launch.json
+!.vscode/launch.json.example
+.vscode/
+
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
@@ -45,4 +52,8 @@ app.*.map.json
 /android/app/release
 
 # Environment variables / Secret tokens
+# Only the populated local file is ignored. Keep `.env.example` in version control
+# so newcomers have a documented template to copy from.
 .env
+.env.*
+!.env.example

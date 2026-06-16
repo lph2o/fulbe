@@ -7,12 +7,14 @@ class FcAvatar extends StatelessWidget {
   final String? imageUrl;
   final String? initials;
   final double size;
+  final bool showBorder;
 
   const FcAvatar({
     super.key,
     this.imageUrl,
     this.initials,
     this.size = AppSpacing.avatarMd,
+    this.showBorder = true,
   });
 
   @override
@@ -22,7 +24,9 @@ class FcAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+        border: showBorder
+            ? Border.all(color: AppColors.outlineVariant, width: 0.8)
+            : null,
         color: AppColors.surfaceContainerHigh,
       ),
       clipBehavior: Clip.antiAlias,
@@ -67,6 +71,7 @@ class FcCard extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
   final double borderRadius;
+  final Color color;
 
   const FcCard({
     super.key,
@@ -74,25 +79,32 @@ class FcCard extends StatelessWidget {
     this.padding,
     this.onTap,
     this.borderRadius = AppSpacing.radiusLg,
+    this.color = AppColors.surfaceContainerLowest,
   });
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surfaceContainerLowest,
+      color: color,
       borderRadius: BorderRadius.circular(borderRadius),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(borderRadius),
         child: Container(
           decoration: BoxDecoration(
+            color: color,
             borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(color: AppColors.outlineVariant, width: 0.8),
             boxShadow: [
               BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 24,
+                offset: const Offset(0, 6),
+              ),
+              BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),

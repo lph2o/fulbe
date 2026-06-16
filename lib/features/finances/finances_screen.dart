@@ -1,159 +1,360 @@
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/data/models/community_project.dart';
+import '../../core/data/models/transaction.dart';
+import '../../core/data/providers/data_providers.dart';
+import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/data/mock_jobs.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../shared/widgets/app_top_bar.dart';
 import '../../shared/widgets/fc_card.dart';
 
-class FinancesScreen extends StatelessWidget {
+class FinancesScreen extends ConsumerWidget {
   const FinancesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncSummary = ref.watch(financesSummaryProvider);
+    final asyncProjects = ref.watch(projectsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.95),
-        elevation: 0.5,
-        centerTitle: true,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: AppSpacing.marginMobile),
-          child: CircleAvatar(
-            backgroundImage: NetworkImage(
-                'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=150&h=150&fit=crop&q=80'),
-            radius: 20,
-          ),
+      appBar: const AppTopBar(showBack: true),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(financesSummaryProvider);
+          ref.invalidate(projectsProvider);
+          await Future.wait([
+            ref.read(financesSummaryProvider.future),
+            ref.read(projectsProvider.future),
+          ]);
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 100),
+          children: [
+            // ── Header ────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.marginMobile, AppSpacing.stackMd,
+                  AppSpacing.marginMobile, AppSpacing.stackLg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Mes Finances',
+                      style: AppTextStyles.headlineLg
+                          .copyWith(color: AppColors.onSurface, fontSize: 28)),
+                  const SizedBox(height: 2),
+                  Text('Gérez vos cotisations et contributions.',
+                      style: AppTextStyles.bodyMd
+                          .copyWith(color: AppColors.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            // ── Hero Balance Card ──────────────────────────────
+            asyncSummary.when(
+              data: (summary) => Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.marginMobile),
+                child: _BalanceHeroCard(balance: summary.globalBalance),
+              ),
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+                child: _BalanceHeroCard(balance: 0.0),
+              ),
+              error: (_, __) => const Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+                child: _BalanceHeroCard(balance: 0.0),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.stackMd),
+            // ── Next Due ───────────────────────────────────────
+            asyncSummary.when(
+              data: (summary) => Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.marginMobile),
+                child: _NextDueCard(
+                  label: summary.nextDueLabel,
+                  date: summary.nextDueDate,
+                  amount: summary.nextDueAmount,
+                ),
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: AppSpacing.stackLg),
+            // ── Community Projects ─────────────────────────────
+            const Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.marginMobile),
+              child: Text('Projets Communautaires',
+                  style: TextStyle(
+                      color: AppColors.onSurface,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700)),
+            ),
+            const SizedBox(height: AppSpacing.stackMd),
+            asyncProjects.when(
+              data: (projects) => _ProjectsList(projects: projects),
+              loading: () => const _ProjectsLoadingState(),
+              error: (e, _) => _ProjectsErrorState(
+                message: e is AppException
+                    ? e.message
+                    : 'Impossible de charger les projets.',
+                onRetry: () => ref.invalidate(projectsProvider),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.stackLg),
+            // ── Chart ─────────────────────────────────────────
+            asyncSummary.when(
+              data: (summary) => Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.marginMobile),
+                    child: Text('Tendances des 7 derniers mois',
+                        style: TextStyle(
+                            color: AppColors.onSurface,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(height: AppSpacing.stackMd),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.marginMobile),
+                    child: FcCard(
+                      child: _BarChart(
+                        data: summary.chartData,
+                        months: summary.chartMonths,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: AppSpacing.stackLg),
+            // ── Transaction History ──────────────────────────
+            asyncSummary.when(
+              data: (summary) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.marginMobile),
+                    child: Text('Historique des Transactions',
+                        style: TextStyle(
+                            color: AppColors.onSurface,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  const SizedBox(height: AppSpacing.stackMd),
+                  if (summary.transactions.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.marginMobile),
+                      child: Text('Aucune transaction pour le moment.',
+                          style: TextStyle(color: AppColors.onSurfaceVariant)),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.marginMobile),
+                      child: FcCard(
+                        padding: EdgeInsets.zero,
+                        child: Column(
+                          children: summary.transactions
+                              .asMap()
+                              .entries
+                              .map((e) => Column(
+                                    children: [
+                                      _TransactionRow(tx: e.value),
+                                      if (e.key < summary.transactions.length - 1)
+                                        Divider(
+                                            height: 0,
+                                            color: AppColors.outlineVariant
+                                                .withValues(alpha: 0.5)),
+                                    ],
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.stackLg),
+                  child: CircularProgressIndicator(strokeWidth: 2.4),
+                ),
+              ),
+              error: (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.stackLg),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(PhosphorIcons.cloudSlash,
+                          size: 56, color: AppColors.outlineVariant),
+                      const SizedBox(height: AppSpacing.stackMd),
+                      Text(
+                        e is AppException
+                            ? e.message
+                            : 'Impossible de charger vos finances.',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.bodyMd
+                            .copyWith(color: AppColors.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: AppSpacing.stackMd),
+                      FilledButton.tonalIcon(
+                        onPressed: () => ref.invalidate(financesSummaryProvider),
+                        icon: const Icon(PhosphorIcons.arrowsClockwise, size: 18),
+                        label: const Text('Réessayer'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        title: Text('Fulɓe Connect',
-            style: AppTextStyles.headlineLgMobile
-                .copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined,
-                color: AppColors.onSurfaceVariant),
-            onPressed: () {},
-            padding: const EdgeInsets.only(right: AppSpacing.marginMobile),
+      ),
+    );
+  }
+}
+
+// ── Projects List ────────────────────────────────────────────────────────────
+
+class _ProjectsList extends StatelessWidget {
+  final List<CommunityProject> projects;
+  const _ProjectsList({required this.projects});
+
+  @override
+  Widget build(BuildContext context) {
+    if (projects.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+        child: Text('Aucun projet en cours pour le moment.',
+            style: TextStyle(color: AppColors.onSurfaceVariant)),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+      child: Column(
+        children: projects.map((p) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.stackMd),
+            child: _ProjectCard(project: p),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _ProjectsLoadingState extends StatelessWidget {
+  const _ProjectsLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+      child: Column(
+        children: [
+          _ProjectCardSkeleton(),
+          SizedBox(height: AppSpacing.stackMd),
+          _ProjectCardSkeleton(),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProjectsErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ProjectsErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+      child: Column(
+        children: [
+          Text(message,
+              style: AppTextStyles.bodyMd
+                  .copyWith(color: AppColors.onSurfaceVariant)),
+          const SizedBox(height: AppSpacing.stackSm),
+          TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(PhosphorIcons.arrowsClockwise, size: 16),
+            label: const Text('Réessayer'),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 100),
+    );
+  }
+}
+
+class _ProjectCardSkeleton extends StatelessWidget {
+  const _ProjectCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return FcCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-                AppSpacing.marginMobile, AppSpacing.stackMd,
-                AppSpacing.marginMobile, AppSpacing.stackLg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Mes Finances',
-                    style: AppTextStyles.headlineLg
-                        .copyWith(color: AppColors.onSurface, fontSize: 28)),
-                const SizedBox(height: 2),
-                Text('Gérez vos cotisations et contributions.',
-                    style: AppTextStyles.bodyMd
-                        .copyWith(color: AppColors.onSurfaceVariant)),
-              ],
-            ),
-          ),
-          // ── Hero Balance Card ──────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.marginMobile),
-            child: _BalanceHeroCard(),
-          ),
-          const SizedBox(height: AppSpacing.stackMd),
-          // ── Next Due ───────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.marginMobile),
-            child: _NextDueCard(),
-          ),
-          const SizedBox(height: AppSpacing.stackLg),
-          // ── Community Projects ─────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.marginMobile),
-            child: Text('Projets Communautaires',
-                style: AppTextStyles.headlineLgMobile
-                    .copyWith(color: AppColors.onSurface, fontSize: 18)),
-          ),
-          const SizedBox(height: AppSpacing.stackMd),
-          const Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.marginMobile),
-            child: Column(
-              children: [
-                _ProjectCard(
-                  icon: Icons.water_drop_outlined,
-                  color: AppColors.tertiaryContainer,
-                  title: 'Projet Eau Potable',
-                  location: 'Région de Ziguinchor, SN',
-                  progress: 0.75,
-                  current: 375000,
-                  target: 500000,
-                  currency: 'FCFA',
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
-                SizedBox(height: AppSpacing.stackMd),
-                _ProjectCard(
-                  icon: Icons.school_outlined,
-                  color: AppColors.secondaryContainer,
-                  title: 'Bourses Universitaires',
-                  location: 'Diaspora mondiale',
-                  progress: 0.40,
-                  current: 200000,
-                  target: 500000,
-                  currency: 'FCFA',
+              ),
+              const SizedBox(width: AppSpacing.stackMd),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 80,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.stackLg),
-          // ── Chart ─────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.marginMobile),
-            child: Text('Tendances des 7 derniers mois',
-                style: AppTextStyles.headlineLgMobile
-                    .copyWith(color: AppColors.onSurface, fontSize: 18)),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.stackMd),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.marginMobile),
-            child: FcCard(child: _BarChart()),
-          ),
-          const SizedBox(height: AppSpacing.stackLg),
-          // ── Transaction History ────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.marginMobile),
-            child: Text('Historique des Transactions',
-                style: AppTextStyles.headlineLgMobile
-                    .copyWith(color: AppColors.onSurface, fontSize: 18)),
-          ),
-          const SizedBox(height: AppSpacing.stackMd),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.marginMobile),
-            child: FcCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: MockFinances.transactions
-                    .asMap()
-                    .entries
-                    .map((e) => Column(
-                          children: [
-                            _TransactionRow(tx: e.value),
-                            if (e.key < MockFinances.transactions.length - 1)
-                              Divider(
-                                  height: 0,
-                                  color: AppColors.outlineVariant
-                                      .withValues(alpha: 0.5)),
-                          ],
-                        ))
-                    .toList(),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(4),
               ),
             ),
           ),
@@ -166,6 +367,9 @@ class FinancesScreen extends StatelessWidget {
 // ── Balance Hero ─────────────────────────────────────────────────────────────
 
 class _BalanceHeroCard extends StatelessWidget {
+  final double balance;
+  const _BalanceHeroCard({required this.balance});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -216,7 +420,7 @@ class _BalanceHeroCard extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle,
+                          const Icon(PhosphorIcons.checkCircleFill,
                               color: Color(0xFF86AF99), size: 12),
                           const SizedBox(width: 4),
                           Text('Abonnement Actif',
@@ -229,7 +433,7 @@ class _BalanceHeroCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.stackMd),
                 Text(
-                  '1 250 FCFA',
+                  '${balance.round()} FCFA',
                   style: AppTextStyles.displayLg.copyWith(
                     color: Colors.white,
                     fontSize: 40,
@@ -246,7 +450,7 @@ class _BalanceHeroCard extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {},
-                        icon: const Icon(Icons.add, size: 16),
+                        icon: const Icon(PhosphorIcons.plus, size: 16),
                         label: const Text('Payer maintenant'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondaryContainer,
@@ -273,7 +477,7 @@ class _BalanceHeroCard extends StatelessWidget {
                         border: Border.all(
                             color: Colors.white.withValues(alpha: 0.2)),
                       ),
-                      child: const Icon(Icons.history,
+                      child: const Icon(PhosphorIcons.clockCounterClockwise,
                           color: Colors.white, size: 20),
                     ),
                   ],
@@ -288,6 +492,15 @@ class _BalanceHeroCard extends StatelessWidget {
 }
 
 class _NextDueCard extends StatelessWidget {
+  final String label;
+  final String date;
+  final double amount;
+  const _NextDueCard({
+    required this.label,
+    required this.date,
+    required this.amount,
+  });
+
   @override
   Widget build(BuildContext context) {
     return FcCard(
@@ -300,7 +513,7 @@ class _NextDueCard extends StatelessWidget {
               color: AppColors.secondaryContainer.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            child: const Icon(Icons.schedule,
+            child: const Icon(PhosphorIcons.clock,
                 color: AppColors.secondary, size: 22),
           ),
           const SizedBox(width: AppSpacing.stackMd),
@@ -311,11 +524,11 @@ class _NextDueCard extends StatelessWidget {
                 Text('Prochaine Échéance',
                     style: AppTextStyles.labelSm
                         .copyWith(color: AppColors.onSurfaceVariant)),
-                Text(MockFinances.nextDueLabel,
+                Text(label,
                     style: AppTextStyles.labelMd.copyWith(
                         color: AppColors.onSurface,
                         fontWeight: FontWeight.w700)),
-                Text('15 Oct 2024',
+                Text(date,
                     style: AppTextStyles.labelSm
                         .copyWith(color: AppColors.onSurfaceVariant)),
               ],
@@ -324,7 +537,7 @@ class _NextDueCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('50 FCFA',
+              Text('${amount.round()} FCFA',
                   style: AppTextStyles.labelMd.copyWith(
                       color: AppColors.onSurface,
                       fontWeight: FontWeight.w800,
@@ -352,29 +565,14 @@ class _NextDueCard extends StatelessWidget {
 // ── Project Card ─────────────────────────────────────────────────────────────
 
 class _ProjectCard extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String location;
-  final double progress;
-  final int current;
-  final int target;
-  final String currency;
-
-  const _ProjectCard({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.location,
-    required this.progress,
-    required this.current,
-    required this.target,
-    required this.currency,
-  });
+  final CommunityProject project;
+  const _ProjectCard({required this.project});
 
   @override
   Widget build(BuildContext context) {
-    final pct = (progress * 100).round();
+    final pct = (project.progress * 100).round();
+    final currentInt = project.currentAmount.round();
+    final targetInt = project.targetAmount.round();
     return FcCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,27 +583,27 @@ class _ProjectCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color,
+                  color: project.color.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
-                child: Icon(icon, size: 20,
-                    color: AppColors.onSecondaryContainer),
+                child: Icon(project.icon, size: 20,
+                    color: project.color),
               ),
               const SizedBox(width: AppSpacing.stackMd),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
+                    Text(project.title,
                         style: AppTextStyles.labelMd.copyWith(
                             color: AppColors.onSurface,
                             fontWeight: FontWeight.w700)),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined,
+                        const Icon(PhosphorIcons.mapPin,
                             size: 11, color: AppColors.onSurfaceVariant),
                         const SizedBox(width: 2),
-                        Text(location,
+                        Text(project.location,
                             style: AppTextStyles.labelSm
                                 .copyWith(color: AppColors.onSurfaceVariant)),
                       ],
@@ -424,7 +622,7 @@ class _ProjectCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: progress,
+              value: project.progress,
               backgroundColor: AppColors.surfaceContainerHigh,
               valueColor:
                   const AlwaysStoppedAnimation(AppColors.primaryContainer),
@@ -435,10 +633,10 @@ class _ProjectCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('$current $currency collectés',
+              Text('$currentInt ${project.currency} collectés',
                   style: AppTextStyles.labelSm
                       .copyWith(color: AppColors.onSurfaceVariant)),
-              Text('Objectif : $target $currency',
+              Text('Objectif : $targetInt ${project.currency}',
                   style: AppTextStyles.labelSm
                       .copyWith(color: AppColors.onSurfaceVariant)),
             ],
@@ -452,10 +650,16 @@ class _ProjectCard extends StatelessWidget {
 // ── Bar Chart ─────────────────────────────────────────────────────────────────
 
 class _BarChart extends StatelessWidget {
+  final List<double> data;
+  final List<String> months;
+  const _BarChart({required this.data, required this.months});
+
   @override
   Widget build(BuildContext context) {
-    final maxVal = MockFinances.chartData
-        .reduce((a, b) => a > b ? a : b);
+    if (data.isEmpty || months.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final maxVal = data.reduce((a, b) => a > b ? a : b);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -467,8 +671,8 @@ class _BarChart extends StatelessWidget {
           height: 100,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: MockFinances.chartData.asMap().entries.map((e) {
-              final ratio = e.value / maxVal;
+            children: data.asMap().entries.map((e) {
+              final ratio = maxVal == 0 ? 0.0 : e.value / maxVal;
               final isMax = e.value == maxVal;
               return Expanded(
                 child: Padding(
@@ -492,7 +696,6 @@ class _BarChart extends StatelessWidget {
                         curve: Curves.easeOut,
                         height: 90 * ratio,
                         decoration: BoxDecoration(
-                          // Fix: use primary-container color (not tertiary blue)
                           color: isMax
                               ? AppColors.primaryContainer
                               : AppColors.primaryFixed,
@@ -509,7 +712,7 @@ class _BarChart extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Row(
-          children: MockFinances.chartMonths.map((m) {
+          children: months.map((m) {
             return Expanded(
               child: Text(m,
                   textAlign: TextAlign.center,
@@ -531,8 +734,24 @@ class _TransactionRow extends StatelessWidget {
   final Transaction tx;
   const _TransactionRow({required this.tx});
 
+  IconData get _icon {
+    switch (tx.icon) {
+      case 'workspace_premium':
+        return PhosphorIcons.crownSimple;
+      case 'school':
+        return PhosphorIcons.graduationCap;
+      case 'groups':
+        return PhosphorIcons.users;
+      case 'water_drop':
+        return PhosphorIcons.drop;
+      default:
+        return tx.amount < 0 ? PhosphorIcons.minus : PhosphorIcons.plus;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDebit = tx.amount < 0;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.stackMd),
       child: Row(
@@ -544,8 +763,9 @@ class _TransactionRow extends StatelessWidget {
               color: AppColors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            child: const Icon(Icons.remove,
-                size: 20, color: AppColors.error),
+            child: Icon(_icon,
+                size: 20,
+                color: isDebit ? AppColors.error : AppColors.primaryContainer),
           ),
           const SizedBox(width: AppSpacing.stackMd),
           Expanded(
@@ -556,16 +776,18 @@ class _TransactionRow extends StatelessWidget {
                     style: AppTextStyles.labelMd.copyWith(
                         color: AppColors.onSurface,
                         fontWeight: FontWeight.w600)),
-                Text(tx.date,
+                Text('${tx.date} • ${tx.method}',
                     style: AppTextStyles.labelSm
                         .copyWith(color: AppColors.onSurfaceVariant)),
               ],
             ),
           ),
           Text(
-            '${tx.amount < 0 ? '-' : '+'}${tx.amount.abs().round()} FCFA',
+            '${isDebit ? '-' : '+'}${tx.amount.abs().round()} FCFA',
             style: AppTextStyles.labelMd.copyWith(
-              color: tx.amount < 0 ? AppColors.error : AppColors.primaryContainer,
+              color: isDebit
+                  ? AppColors.error
+                  : AppColors.primaryContainer,
               fontWeight: FontWeight.w700,
             ),
           ),

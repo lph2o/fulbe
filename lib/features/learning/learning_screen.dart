@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
@@ -28,15 +29,12 @@ class LearningScreen extends StatelessWidget {
         backgroundColor: AppColors.surface.withValues(alpha: 0.95),
         elevation: 0.5,
         titleSpacing: 0,
-        leadingWidth: 60,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: AppSpacing.marginMobile),
-          child: CircleAvatar(
-            backgroundImage: NetworkImage(
-                'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=150&h=150&fit=crop&q=80'),
-            radius: 20,
+        leadingWidth: 56,
+        leading: IconButton(
+            icon: const Icon(PhosphorIcons.arrowLeft,
+                color: AppColors.onSurfaceVariant, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-        ),
         title: Row(
           children: [
             // Streak badge
@@ -78,7 +76,7 @@ class LearningScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined,
+            icon: const Icon(PhosphorIcons.gear,
                 color: AppColors.onSurfaceVariant),
             onPressed: () {},
             padding:
@@ -114,7 +112,7 @@ class LearningScreen extends StatelessWidget {
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),
                     ),
-                    child: const Icon(Icons.school,
+                    child: const Icon(PhosphorIcons.graduationCap,
                         color: Colors.white, size: 24),
                   ),
                   const SizedBox(width: AppSpacing.stackMd),
@@ -368,10 +366,10 @@ class _NodeWidget extends StatelessWidget {
                 ),
                 child: Center(
                   child: node.state == _NodeState.locked
-                      ? const Icon(Icons.lock_outline,
+                      ? const Icon(PhosphorIcons.lockSimple,
                           color: AppColors.onSurfaceVariant, size: 28)
                       : node.state == _NodeState.done
-                          ? const Icon(Icons.check,
+                          ? const Icon(PhosphorIcons.checkCircleFill,
                               color: AppColors.primaryContainer, size: 28)
                           : Text(node.label,
                               style: AppTextStyles.headlineLgMobile.copyWith(
@@ -430,10 +428,10 @@ class _NodeWidget extends StatelessWidget {
                   children: [
                     Icon(
                       node.state == _NodeState.done
-                          ? Icons.check_circle
+                          ? PhosphorIcons.checkCircleFill
                           : node.state == _NodeState.active
-                              ? Icons.play_circle_outline
-                              : Icons.lock_outline,
+                              ? PhosphorIcons.playCircle
+                              : PhosphorIcons.lockSimple,
                       size: 13,
                       color: node.state == _NodeState.done
                           ? AppColors.primaryContainer

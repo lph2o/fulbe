@@ -1,57 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/data/models/job.dart';
+import '../../core/data/providers/data_providers.dart';
+import '../../core/errors/app_exception.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/data/mock_jobs.dart';
+import '../../shared/widgets/app_top_bar.dart';
 import '../../shared/widgets/fc_card.dart';
 import '../../shared/widgets/fc_chip.dart';
 import '../../shared/widgets/fc_search_bar.dart';
+import '../../core/navigation/app_router.dart';
 
-class JobsScreen extends StatefulWidget {
+class JobsScreen extends ConsumerStatefulWidget {
   const JobsScreen({super.key});
 
   @override
-  State<JobsScreen> createState() => _JobsScreenState();
+  ConsumerState<JobsScreen> createState() => _JobsScreenState();
 }
 
-class _JobsScreenState extends State<JobsScreen> {
+class _JobsScreenState extends ConsumerState<JobsScreen> {
   int _selectedRole = 0;
   int _selectedCountry = 0;
   int _selectedDomain = 0;
 
-  List<Job> get _filtered {
-    if (_selectedRole == 0) return MockJobs.all;
-    final role = MockJobs.roleFilters[_selectedRole];
-    return MockJobs.all.where((j) => j.type == role).toList();
+  // ── Filter labels (UI) ──────────────────────────────────────────────────
+  static const _roleFilters = [
+    'Tous',
+    'Full-time',
+    'Internships',
+    'Freelance',
+  ];
+  static const _countries = [
+    'Tous les pays',
+    'Sénégal',
+    'France',
+    'Guinée',
+    'Mali',
+    'Italie',
+  ];
+  static const _domains = [
+    'Tous domaines',
+    'Tech',
+    'Santé',
+    'Finance',
+    'Agriculture',
+    'Design',
+  ];
+
+  List<Job> _filter(List<Job> jobs) {
+    var list = _selectedRole == 0
+        ? jobs
+        : jobs.where((j) => j.type == _roleFilters[_selectedRole]).toList();
+
+    if (_selectedCountry != 0) {
+      final countryToken = _countries[_selectedCountry].split(' ').first.toLowerCase();
+      list = list
+          .where((j) => j.location.toLowerCase().contains(countryToken))
+          .toList();
+    }
+
+    if (_selectedDomain != 0) {
+      final selectedDomain = _domains[_selectedDomain];
+      list = list.where((j) => j.domain == selectedDomain).toList();
+    }
+
+    return list;
   }
 
   @override
   Widget build(BuildContext context) {
+    final asyncJobs = ref.watch(jobsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.95),
-        elevation: 0.5,
-        centerTitle: true,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: AppSpacing.marginMobile),
-          child: CircleAvatar(
-            backgroundImage: NetworkImage(
-                'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=150&h=150&fit=crop&q=80'),
-            radius: 20,
-          ),
+      appBar: const AppTopBar(showBack: true),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final created = await Navigator.of(context)
+              .pushNamed(AppRoutes.createJob);
+          if (created == true && mounted) {
+            ref.invalidate(jobsProvider);
+          }
+        },
+        backgroundColor: AppColors.primaryContainer,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        title: Text('Fulɓe Connect',
-            style: AppTextStyles.headlineLgMobile
-                .copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined,
-                color: AppColors.onSurfaceVariant),
-            onPressed: () {},
-            padding: const EdgeInsets.only(right: AppSpacing.marginMobile),
-          ),
-        ],
+        child: const Icon(PhosphorIcons.plus, size: 24),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,18 +123,18 @@ class _JobsScreenState extends State<JobsScreen> {
                   children: [
                     Expanded(
                       child: _DropdownFilter(
-                        label: MockJobs.countries[_selectedCountry],
-                        icon: Icons.public,
-                        items: MockJobs.countries,
+                        label: _countries[_selectedCountry],
+                        icon: PhosphorIcons.globe,
+                        items: _countries,
                         onSelect: (i) => setState(() => _selectedCountry = i),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.stackSm),
                     Expanded(
                       child: _DropdownFilter(
-                        label: MockJobs.domains[_selectedDomain],
-                        icon: Icons.work_outline,
-                        items: MockJobs.domains,
+                        label: _domains[_selectedDomain],
+                        icon: PhosphorIcons.briefcase,
+                        items: _domains,
                         onSelect: (i) => setState(() => _selectedDomain = i),
                       ),
                     ),
@@ -106,30 +146,61 @@ class _JobsScreenState extends State<JobsScreen> {
           ),
           // Role filter chips
           FcChipRow(
-            labels: MockJobs.roleFilters,
+            labels: _roleFilters,
             onSelectionChanged: (i) => setState(() => _selectedRole = i),
           ),
           const SizedBox(height: AppSpacing.stackMd),
-          // Job cards
+          // Job cards (Riverpod)
           Expanded(
-            child: _filtered.isEmpty
-                ? _EmptyState()
-                : ListView.separated(
+            child: asyncJobs.when(
+              data: (jobs) {
+                final filtered = _filter(jobs);
+                if (filtered.isEmpty) return const _EmptyState();
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(jobsProvider);
+                    await ref.read(jobsProvider.future);
+                  },
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.only(
                       left: AppSpacing.marginMobile,
                       right: AppSpacing.marginMobile,
                       bottom: 100,
                     ),
-                    itemCount: _filtered.length + 1,
+                    itemCount: filtered.length + 1,
                     separatorBuilder: (_, __) =>
                         const SizedBox(height: AppSpacing.stackMd),
                     itemBuilder: (_, i) {
-                      if (i == _filtered.length) {
-                        return _LoadMoreButton();
+                      if (i == filtered.length) {
+                        return const _LoadMoreButton();
                       }
-                      return _JobCard(job: _filtered[i]);
+                      return _JobCard(job: filtered[i]);
                     },
                   ),
+                );
+              },
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.stackLg),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(strokeWidth: 2.4),
+                      SizedBox(height: AppSpacing.stackMd),
+                      Text('Chargement des offres...',
+                          style: TextStyle(color: AppColors.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+              ),
+              error: (e, _) => _ErrorView(
+                message: e is AppException
+                    ? e.message
+                    : 'Impossible de charger les offres d\'emploi.',
+                onRetry: () => ref.invalidate(jobsProvider),
+              ),
+            ),
           ),
         ],
       ),
@@ -193,7 +264,7 @@ class _DropdownFilter extends StatelessWidget {
                   style: AppTextStyles.labelSm.copyWith(
                       color: AppColors.onSurface, fontWeight: FontWeight.w500)),
             ),
-            const Icon(Icons.expand_more,
+            const Icon(PhosphorIcons.caretDown,
                 size: 16, color: AppColors.onSurfaceVariant),
           ],
         ),
@@ -297,9 +368,9 @@ class _JobCard extends StatelessWidget {
             spacing: AppSpacing.stackSm,
             runSpacing: AppSpacing.stackSm,
             children: [
-              _InfoTag(icon: Icons.location_on_outlined, label: job.location),
-              _InfoTag(icon: Icons.access_time, label: job.type),
-              _InfoTag(icon: Icons.schedule, label: job.postedAgo),
+              _InfoTag(icon: PhosphorIcons.mapPin, label: job.location),
+              _InfoTag(icon: PhosphorIcons.clock, label: job.type),
+              _InfoTag(icon: PhosphorIcons.clock, label: job.postedAgo),
             ],
           ),
           const SizedBox(height: AppSpacing.stackMd),
@@ -348,13 +419,15 @@ class _InfoTag extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.work_off_outlined,
+          const Icon(PhosphorIcons.briefcase,
               size: 64, color: AppColors.outlineVariant),
           const SizedBox(height: AppSpacing.stackMd),
           Text('Aucune offre pour ce filtre.',
@@ -366,7 +439,42 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.stackLg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(PhosphorIcons.cloudSlash,
+                size: 56, color: AppColors.outlineVariant),
+            const SizedBox(height: AppSpacing.stackMd),
+            Text(message,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyMd
+                    .copyWith(color: AppColors.onSurfaceVariant)),
+            const SizedBox(height: AppSpacing.stackMd),
+            FilledButton.tonalIcon(
+              onPressed: onRetry,
+              icon: const Icon(PhosphorIcons.arrowsClockwise, size: 18),
+              label: const Text('Réessayer'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _LoadMoreButton extends StatelessWidget {
+  const _LoadMoreButton();
+
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
